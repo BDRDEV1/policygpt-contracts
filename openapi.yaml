@@ -1,0 +1,229 @@
+openapi: 3.1.0
+info:
+  title: PolicyGPT Coordinator API
+  version: 0.1.0
+  description: Appendix C skeleton from POLICYGPT_ARCHITECTURE_PLAN.md. Frozen API surface; implementation details fill in during M0/M1.
+servers:
+  - url: https://coordinator.example.com
+    description: Placeholder Cloud Run coordinator URL
+tags:
+  - name: plugin
+  - name: rater
+  - name: staff
+  - name: admin
+paths:
+  /health:
+    get:
+      tags: [plugin]
+      summary: Health check
+      responses:
+        "200":
+          description: Coordinator is healthy
+  /chat:
+    post:
+      tags: [plugin]
+      summary: Free Q&A or quote-mode chat request
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: Chat response
+  /quote/start:
+    post:
+      tags: [plugin]
+      summary: Start a quote session
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: First quote question/card
+  /quote/answer:
+    post:
+      tags: [plugin]
+      summary: Submit a scalar answer
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: Next question/card or completion state
+  /quote/answer-group:
+    post:
+      tags: [plugin]
+      summary: Submit grouped card answers
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: Next question/card or completion state
+  /quote/edit-question:
+    post:
+      tags: [plugin]
+      summary: Re-open an answered question
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: Re-opened question/card
+  /upload:
+    post:
+      tags: [plugin]
+      summary: Upload a customer document and return a storage reference
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: Upload accepted
+  /quote/{id}/pdf:
+    get:
+      tags: [plugin]
+      summary: Mint a short-lived signed quote PDF URL after auth/PIN check
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Signed display URL
+  /agent/callback:
+    post:
+      tags: [plugin]
+      summary: Request an agent callback
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: Callback request recorded
+  /agent/quote-result:
+    post:
+      tags: [staff]
+      summary: Staff-authenticated manual quote result entry
+      responses:
+        "200":
+          description: Manual result accepted
+  /admin/lines:
+    get:
+      tags: [admin]
+      summary: List configured insurance lines
+      responses:
+        "200":
+          description: Line list
+  /admin/lines/{line}/professions:
+    get:
+      tags: [admin]
+      summary: List professions for an insurance line
+      parameters:
+        - name: line
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profession list
+  /admin/lines/{line}/professions/{profession}:
+    put:
+      tags: [admin]
+      summary: Author or update a profession question set
+      parameters:
+        - name: line
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: profession
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Question set updated
+  /rater/jobs/claim:
+    post:
+      tags: [rater]
+      summary: Atomically claim one queued job
+      security:
+        - workerHmac: []
+      responses:
+        "200":
+          description: Job claimed
+        "204":
+          description: No queued job
+  /rater/jobs/{job_id}/heartbeat:
+    post:
+      tags: [rater]
+      summary: Extend a claimed job lease and report progress
+      security:
+        - workerHmac: []
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: Heartbeat accepted
+  /rater/jobs/{job_id}/complete:
+    post:
+      tags: [rater]
+      summary: Complete a claimed rater job
+      security:
+        - workerHmac: []
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./completion.schema.json"
+      responses:
+        "200":
+          description: Completion accepted idempotently
+  /rater/jobs/{job_id}/fail:
+    post:
+      tags: [rater]
+      summary: Fail a claimed rater job
+      security:
+        - workerHmac: []
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: Failure accepted
+  /rater/artifacts/sign:
+    post:
+      tags: [rater]
+      summary: Mint a short-lived GCS upload URL for a rater artifact
+      security:
+        - workerHmac: []
+      responses:
+        "200":
+          description: Signed upload URL
+  /rater/worker/heartbeat:
+    post:
+      tags: [rater]
+      summary: Report worker process health
+      security:
+        - workerHmac: []
+      responses:
+        "200":
+          description: Worker heartbeat accepted
+components:
+  securitySchemes:
+    pluginHmac:
+      type: apiKey
+      in: header
+      name: X-PolicyGPT-Signature
+      description: sha256 HMAC over timestamp.raw_body using PLUGIN_SECRET, with timestamp/environment/nonce replay checks.
+    workerHmac:
+      type: apiKey
+      in: header
+      name: X-PolicyGPT-Signature
+      description: sha256 HMAC over timestamp.raw_body using WORKER_SECRET, with timestamp/nonce replay checks.
+  parameters:
+    JobId:
+      name: job_id
+      in: path
+      required: true
+      schema:
+        type: string

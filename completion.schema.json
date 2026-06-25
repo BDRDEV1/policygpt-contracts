@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/contracts/completion.schema.json",
+  "title": "PolicyGPT Quote Completion (Rater -> Coordinator)",
+  "description": "Appendix B of POLICYGPT_ARCHITECTURE_PLAN.md (v1.1 -- artifact pointers, not pdf_url). Single source of truth; vendor this file. Changes are spec changes (architecture plan section 23.1).",
+  "type": "object",
+  "required": [
+    "event_type",
+    "event_id",
+    "quote_session_id",
+    "job_id",
+    "status",
+    "carrier_results"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "event_type": { "const": "policygpt.comparative_rater.quote.completed" },
+    "event_id": {
+      "type": "string",
+      "description": "Idempotency key. Duplicate completes with the same event_id are no-ops."
+    },
+    "quote_session_id": { "type": "string" },
+    "job_id": { "type": "string" },
+    "status": { "enum": ["quote_ready", "referred", "declined", "error"] },
+    "selected_carrier": {
+      "type": ["string", "null"],
+      "description": "Lowest-premium quote_ready carrier per the selection rule (rater spec section 7.2); null if none quoted."
+    },
+    "premium": { "type": ["string", "null"] },
+    "quote_number": { "type": ["string", "null"] },
+    "artifacts": {
+      "type": "array",
+      "description": "PDF/document POINTERS, never baked-in signed URLs. Coordinator mints display URLs on demand.",
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "quote_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "line_of_business": { "type": "string" },
+        "limits": { "type": "string" },
+        "deductible": { "type": "string" }
+      }
+    },
+    "carrier_results": {
+      "type": "array",
+      "description": "Every eligible carrier's result, including declined/referred (valid outcomes, not errors).",
+      "items": {
+        "type": "object",
+        "required": ["carrier", "status"],
+        "additionalProperties": true,
+        "properties": {
+          "carrier": { "type": "string" },
+          "status": { "enum": ["quote_ready", "referred", "declined", "error"] },
+          "premium": { "type": ["string", "null"] },
+          "quote_number": { "type": ["string", "null"] },
+          "documents": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "carrier": { "type": "string" },
+          "reason_code": {
+            "enum": ["login_failed", "form_changed", "captcha", "blocked", "timeout", "declined", "referred", "unknown"]
+          },
+          "message": { "type": "string" },
+          "retryable": { "type": "boolean" }
+        }
+      }
+    },
+    "expires_at": { "type": "string", "description": "ISO 8601 timestamp." }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": ["storage_path", "mime"],
+      "additionalProperties": true,
+      "properties": {
+        "kind": { "type": "string", "examples": ["quote_pdf"] },
+        "storage_path": {
+          "type": "string",
+          "description": "GCS object path (pointer). NOT a baked-in signed URL."
+        },
+        "checksum": { "type": "string", "description": "e.g. sha256:..." },
+        "mime": { "type": "string", "examples": ["application/pdf"] }
+      }
+    }
+  }
+}
