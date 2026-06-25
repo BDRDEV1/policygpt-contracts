@@ -13,8 +13,7 @@
     "line_of_business",
     "profession",
     "business_type",
-    "customer",
-    "callback_url"
+    "customer"
   ],
   "additionalProperties": true,
   "properties": {
@@ -92,7 +91,6 @@
         "preferred_carriers": { "type": "array", "items": { "type": "string" } },
         "excluded_carriers": { "type": "array", "items": { "type": "string" } }
       }
-    },
-    "callback_url": { "type": "string", "format": "uri" }
+    }
   }
 }

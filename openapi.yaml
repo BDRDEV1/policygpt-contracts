@@ -8,10 +8,134 @@ servers:
     description: Placeholder Cloud Run coordinator URL
 tags:
   - name: plugin
+  - name: guest
   - name: rater
   - name: staff
   - name: admin
 paths:
+  # Guest session & PIN flow (plan §9.1, §9.3, §6.5, §6.8)
+  /guest/session:
+    post:
+      tags: [guest]
+      summary: Issue a guest session token on first contact
+      description: "Plugin calls this before any quote or Q&A for an unauthenticated visitor. Returns a session_id stored client-side (httpOnly cookie preferred). Plan §9.1."
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: Guest session token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [session_id]
+                properties:
+                  session_id: { type: string }
+  /quote/{id}/status:
+    get:
+      tags: [plugin]
+      summary: Poll quote progress for the live-progress indicator
+      description: "Plugin polls every ~1–2 s after intake completes to drive the progress indicator. Returns current job status, stage label, and progress %. Plan §6.8."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Current quote status and progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [queued, claimed, running, completed, failed] }
+                  stage: { type: string, description: "Human-readable stage label e.g. 'Checking Carrier A…'" }
+                  progress: { type: integer, minimum: 0, maximum: 100 }
+        "404":
+          description: Session/job not found
+  /quote/{id}/pin/verify:
+    post:
+      tags: [guest]
+      summary: Verify a guest PIN to retrieve a completed quote
+      description: "Guest returns via magic link, enters 6-digit PIN. Coordinator verifies against salted hash, throttles attempts, locks after N failures. Plan §9.3."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pin, email]
+              properties:
+                pin: { type: string, pattern: "^[0-9]{6}$" }
+                email: { type: string, format: email }
+      responses:
+        "200":
+          description: PIN verified; returns a short-lived retrieval token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [retrieval_token]
+                properties:
+                  retrieval_token: { type: string }
+        "401":
+          description: Invalid PIN
+        "429":
+          description: Too many failed attempts; account locked
+  /quote/{id}/result:
+    get:
+      tags: [guest]
+      summary: Retrieve a completed quote result (requires auth or valid retrieval_token)
+      description: "After PIN verify (guest) or session auth (logged-in), returns the quote result and signed PDF links minted on demand. Plan §6.5."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: retrieval_token
+          in: query
+          required: false
+          schema: { type: string }
+          description: "Short-lived token from /quote/{id}/pin/verify (guest path). Omit when session is authenticated."
+      responses:
+        "200":
+          description: Quote result with carrier results and signed PDF links
+        "401":
+          description: Not authenticated or retrieval_token invalid/expired
+        "404":
+          description: Quote not found
+  /user/quotes:
+    get:
+      tags: [plugin]
+      summary: My Quotes — list a logged-in user's quotes with live status
+      description: "Returns the authenticated user's quote history with current status and on-demand signed PDF links. Plan §6.5, §16 M6."
+      security:
+        - pluginHmac: []
+      responses:
+        "200":
+          description: List of the user's quotes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quotes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        quote_session_id: { type: string }
+                        status: { type: string }
+                        profession: { type: string }
+                        line_of_business: { type: string }
+                        created_at: { type: string }
+                        pdf_url: { type: string, description: "Short-lived signed URL, minted on demand." }
   /health:
     get:
       tags: [plugin]
