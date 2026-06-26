@@ -753,5 +753,3 @@ Branding DECIDED (Josh 2026-06-26): byline "Reviewed by PolicyGPT.com Insurance 
 ```
 
 **Bottom line:** PolicyGPT's advantage is not a model and not a vector database. It is a clean evidence library, governed by an authority matrix, wrapped in a chat-first insurance workflow that knows when to answer, when to cite, when to ask for missing documents, and when to route to a licensed agent. Build the Coordinator-owned deterministic Evidence Service on Firestore + Cloud Storage first; one profession, one state; Gemini for cheap/low-risk, Claude where quality matters; everything heavy deferred behind clean seams.
-
-

@@ -388,8 +388,9 @@ paths:
   /rater/jobs/{job_id}/question-set-draft:
     post:
       tags: [rater]
-      summary: Submit a UW question-set draft harvested by the question-collection crawler
-      description: "When a job runs in fulfillment_mode 'question_set_draft', the rater crawls the carrier flow and posts the harvested questions here (event policygpt.comparative_rater.question_set.drafted). Always reviewed (human/AI) before going live via PUT /admin/lines/{line}/professions/{profession}. Plan 3.2, 11.1 + Adaptive Rater Intelligence."
+      deprecated: true
+      summary: "[DEPRECATED] Submit a UW question-set draft via the quote-job path"
+      description: "DEPRECATED (RAG-AI-000, plan §7.2). Question-set discovery is now a SEPARATE discovery job (see /rater/discovery-jobs/*), NOT a quote-job fulfillment_mode. quote-job fulfillment_mode stays automated|manual only. This path is retained because Adaptive Rater Intelligence (§24.4) already implemented it; it is unused for the MVP discovery flow and will be removed once callers migrate to /rater/discovery-jobs/{discovery_job_id}/question-set-draft. Always reviewed (human/AI) before going live."
       security:
         - workerHmac: []
       parameters:
@@ -403,6 +404,85 @@ paths:
       responses:
         "200":
           description: Draft accepted for review
+  /rater/discovery-jobs/claim:
+    post:
+      tags: [rater]
+      summary: Claim a question-set discovery/crawler job
+      description: "Coordinator -> Rater discovery job, SEPARATE from quote execution (plan §7.2). Atomic claim like quote jobs. Returns a crawler-job.schema.json. Drafts are ALWAYS reviewed before going live; crawler/intake drafts are never coverage authority."
+      security:
+        - workerHmac: []
+      responses:
+        "200":
+          description: A claimed discovery job
+          content:
+            application/json:
+              schema:
+                $ref: "./crawler-job.schema.json"
+        "204":
+          description: No discovery job available
+  /rater/discovery-jobs/{discovery_job_id}/heartbeat:
+    post:
+      tags: [rater]
+      summary: Report discovery-job progress
+      security:
+        - workerHmac: []
+      parameters:
+        - name: discovery_job_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Heartbeat accepted
+  /rater/discovery-jobs/{discovery_job_id}/question-set-draft:
+    post:
+      tags: [rater]
+      summary: Submit a harvested UW question-set draft for review
+      description: "The rater crawls the carrier flow and posts harvested questions here. needs_review is always true; the draft is NEVER promoted to a live question set automatically and is never used as coverage authority."
+      security:
+        - workerHmac: []
+      parameters:
+        - name: discovery_job_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./question-set-draft.schema.json"
+      responses:
+        "200":
+          description: Draft accepted for review
+  /rater/discovery-jobs/{discovery_job_id}/complete:
+    post:
+      tags: [rater]
+      summary: Mark a discovery job complete
+      security:
+        - workerHmac: []
+      parameters:
+        - name: discovery_job_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Discovery job completed
+  /rater/discovery-jobs/{discovery_job_id}/fail:
+    post:
+      tags: [rater]
+      summary: Mark a discovery job failed (retryable per attempt caps)
+      security:
+        - workerHmac: []
+      parameters:
+        - name: discovery_job_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Discovery job failure recorded
 components:
   securitySchemes:
     pluginHmac:
