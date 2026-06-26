@@ -51,6 +51,7 @@
         "additionalProperties": true,
         "properties": {
           "carrier": { "type": "string" },
+          "wholesaler": { "type": ["string", "null"], "description": "Wholesale broker slug the quote ran through (e.g. amwins), or null for direct/retail carriers. Provenance only -- wholesaler logistics are rater-local (architecture plan section 25)." },
           "status": { "enum": ["quote_ready", "referred", "declined", "error"] },
           "premium": { "type": ["string", "null"] },
           "quote_number": { "type": ["string", "null"] },
@@ -67,7 +68,7 @@
         "properties": {
           "carrier": { "type": "string" },
           "reason_code": {
-            "enum": ["login_failed", "form_changed", "captcha", "blocked", "timeout", "declined", "referred", "unknown"]
+            "enum": ["login_failed", "wholesaler_login_failed", "form_changed", "captcha", "blocked", "timeout", "declined", "referred", "unknown"]
           },
           "message": { "type": "string" },
           "retryable": { "type": "boolean" }
