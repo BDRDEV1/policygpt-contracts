@@ -68,7 +68,7 @@
         "properties": {
           "carrier": { "type": "string" },
           "reason_code": {
-            "enum": ["login_failed", "wholesaler_login_failed", "form_changed", "captcha", "blocked", "timeout", "declined", "referred", "unknown"]
+            "enum": ["login_failed", "wholesaler_login_failed", "mfa_code_unavailable", "form_changed", "captcha", "blocked", "timeout", "declined", "referred", "unknown"]
           },
           "message": { "type": "string" },
           "retryable": { "type": "boolean" }
