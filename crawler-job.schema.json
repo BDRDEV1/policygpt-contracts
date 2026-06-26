@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/contracts/crawler-job.schema.json",
+  "title": "PolicyGPT Rater Discovery / Crawler Job",
+  "description": "Coordinator -> Rater job for harvesting carrier question-set drafts. Separate from quote-job.schema.json by design.",
+  "type": "object",
+  "required": ["schema_version","discovery_job_id","job_type","line_of_business","profession","target_carriers","review_required"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type":"string","pattern":"^[0-9]+\\.[0-9]+$"},
+    "discovery_job_id": {"type":"string"},
+    "job_type": {"const":"question_set_discovery"},
+    "line_of_business": {"type":"string"},
+    "profession": {"type":"string"},
+    "jurisdiction": {"type":["string","null"]},
+    "target_carriers": {"type":"array","items":{"type":"string"}},
+    "seed_answers": {"type":"object","additionalProperties":true},
+    "objective": {"enum":["harvest_required_questions","detect_flow_changes","validate_known_question_set"]},
+    "review_required": {"const":true},
+    "authority_label": {"const":"draft_unreviewed_intake_operational"},
+    "requested_by": {"type":["string","null"]},
+    "created_at": {"type":"string"}
+  }
+}

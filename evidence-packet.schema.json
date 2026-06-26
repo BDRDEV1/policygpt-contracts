@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/contracts/evidence-packet.schema.json",
+  "title": "PolicyGPT Evidence Packet (internal / reference)",
+  "description": "Internal Evidence Service artifact. The Coordinator builds this DETERMINISTIC packet (curated chunks + provenance) BEFORE any model call; the model receives only this packet plus narrow instructions and never browses or retrieves on its own. Reference contract -- not a frontend payload. Additive only.",
+  "type": "object",
+  "required": ["schema_version","evidence_packet_id","intent","controlling_lane","as_of_date","slots","candidates"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type":"string","pattern":"^[0-9]+\\.[0-9]+$"},
+    "evidence_packet_id": {"type":"string"},
+    "quote_session_id": {"type":["string","null"]},
+    "job_id": {"type":["string","null"]},
+    "policy_package_id": {"type":["string","null"]},
+    "intent": {"type":"string"},
+    "risk_tier": {"enum":["low","medium","high"]},
+    "controlling_lane": {"enum":["policy","quote_binder","law_regulation","carrier_form","reviewed_guidance","rater_intake","draft_unreviewed","web_temp","none"]},
+    "lanes_used": {"type":"array","items":{"type":"string"}},
+    "as_of_date": {"type":"string"},
+    "acl_scope": {
+      "type": "object",
+      "description": "Tenant/visibility scope applied BEFORE retrieval. Private chunks are only ever drawn from the tenant path.",
+      "additionalProperties": true,
+      "properties": {
+        "tenant_id": {"type":["string","null"]},
+        "visibility": {"enum":["public","tenant_private","mixed"]}
+      }
+    },
+    "slots": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "line_of_business": {"type":["string","null"]},
+        "profession": {"type":["string","null"]},
+        "jurisdiction": {"type":["string","null"]},
+        "carrier": {"type":["string","null"]},
+        "product_name": {"type":["string","null"]},
+        "form_number": {"type":["string","null"]},
+        "edition_date": {"type":["string","null"]},
+        "as_of_date": {"type":["string","null"]}
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "description": "Reranked evidence chunks (deterministic authority reranker). Order is authoritative.",
+      "items": {
+        "type": "object",
+        "required": ["chunk_id","authority_tier","visibility","text"],
+        "additionalProperties": true,
+        "properties": {
+          "chunk_id": {"type":"string"},
+          "document_id": {"type":["string","null"]},
+          "version_id": {"type":["string","null"]},
+          "corpus_id": {"type":["string","null"]},
+          "tenant_id": {"type":["string","null"]},
+          "visibility": {"enum":["public","tenant_private"]},
+          "authority_tier": {"type":"string"},
+          "authority_lane": {"type":["string","null"]},
+          "review_status": {"type":["string","null"]},
+          "jurisdiction": {"type":["string","null"]},
+          "carrier": {"type":["string","null"]},
+          "product_name": {"type":["string","null"]},
+          "form_number": {"type":["string","null"]},
+          "edition_date": {"type":["string","null"]},
+          "page_number": {"type":["integer","null"]},
+          "section_path": {"type":["string","null"]},
+          "effective_from": {"type":["string","null"]},
+          "effective_to": {"type":["string","null"]},
+          "as_of_date": {"type":["string","null"]},
+          "vector_dim": {"type":["integer","null"], "maximum": 2048},
+          "vector_distance": {"type":["number","null"]},
+          "rerank_score": {"type":["number","null"]},
+          "text": {"type":"string"},
+          "source_label": {"type":["string","null"]}
+        }
+      }
+    },
+    "missing_controlling_evidence": {"type":"boolean"},
+    "budget": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "provider_hint": {"enum":["gemini","claude","none"]},
+        "high_risk": {"type":"boolean"},
+        "within_budget": {"type":"boolean"}
+      }
+    },
+    "created_at": {"type":"string"}
+  }
+}
