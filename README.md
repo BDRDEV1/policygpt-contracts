@@ -6,6 +6,14 @@ These JSON Schema files are the **frozen payload contracts** that cross PolicyGP
 - **`quote-job.schema.json`** — Coordinator → Rater job payload (Appendix A). `business_type` is **required** to enforce the known plugin drop-bug fix (§2.1).
 - **`completion.schema.json`** — Rater → Coordinator completion payload (Appendix B, v1.1). Artifacts are **pointers** (`storage_path` + `checksum` + `mime`), never baked-in signed URLs; the Coordinator mints display URLs on demand.
 
+## AI / RAG architecture (additive — RAG-AI-000)
+- **`docs/POLICYGPT_AI_ARCHITECTURE_BUILD_PLAN.md`** — the reconciled AI/Evidence-Service build contract (Firestore + Cloud Storage MVP; authority matrix; deterministic reranker; provider-neutral customer copy; solo-founder scope override). Build contract / ADR extension, not production code.
+- **`evidence-answer.schema.json`** — Coordinator → Plugin evidence-aware answer card (status, scope, claims, citations, escalation flags).
+- **`knowledge-context.schema.json`** — optional routing context for the Evidence Service.
+- **`crawler-job.schema.json`** — Rater **discovery/crawler** job, **separate from `quote-job`** by design (do **not** add `question_set_draft` to quote-job `fulfillment_mode`).
+- **`evidence-packet.schema.json`** — internal/reference: the deterministic curated packet the Coordinator builds **before** any model call (Firestore `vector_dim ≤ 2048`).
+- These are **additive**: existing `quote-job` / `completion` contracts are unchanged. The contract test compiles and spot-validates them.
+
 ## Rules
 - Changing a schema is a **spec change**, raised explicitly (architecture plan §23.1) — not an implementation choice. Edit it **here**; every repo picks it up.
 - `schema_version` is `major.minor`. Consumers **reject an unknown MAJOR** version.

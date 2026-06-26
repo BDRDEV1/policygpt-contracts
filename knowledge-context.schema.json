@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/contracts/knowledge-context.schema.json",
+  "title": "PolicyGPT Knowledge Context",
+  "description": "Optional context used by the Coordinator/Evidence Service to route a session/result to the correct knowledge base. Additive only.",
+  "type": "object",
+  "required": ["line_of_business","profession"],
+  "additionalProperties": true,
+  "properties": {
+    "line_of_business": {"type":"string"},
+    "profession": {"type":"string"},
+    "knowledge_base_ref": {"type":["string","null"]},
+    "jurisdiction": {"type":["string","null"]},
+    "carrier": {"type":["string","null"]},
+    "product_name": {"type":["string","null"]},
+    "form_number": {"type":["string","null"]},
+    "edition_date": {"type":["string","null"]},
+    "quote_session_id": {"type":["string","null"]},
+    "job_id": {"type":["string","null"]},
+    "policy_package_id": {"type":["string","null"]},
+    "as_of_date": {"type":["string","null"]}
+  }
+}

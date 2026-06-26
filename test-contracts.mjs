@@ -87,4 +87,69 @@ assert.equal(validateCompletion(invalidCompletion), false, "completion event_typ
 
 assert.ok(fs.existsSync(path.join(__dirname, "openapi.yaml")), "Appendix C OpenAPI skeleton is required");
 
+// --- Additive RAG / AI architecture schemas (RAG-AI-000). Compile + spot-validate. ---
+const evidenceAnswerSchema = readJson("evidence-answer.schema.json");
+const knowledgeContextSchema = readJson("knowledge-context.schema.json");
+const crawlerJobSchema = readJson("crawler-job.schema.json");
+const evidencePacketSchema = readJson("evidence-packet.schema.json");
+
+const validateEvidenceAnswer = ajv.compile(evidenceAnswerSchema);
+const validateKnowledgeContext = ajv.compile(knowledgeContextSchema);
+const validateCrawlerJob = ajv.compile(crawlerJobSchema);
+const validateEvidencePacket = ajv.compile(evidencePacketSchema);
+
+// crawler-job MUST stay separate from quote-job (do not add question_set_draft to fulfillment_mode).
+assert.ok(
+  !JSON.stringify(quoteJobSchema).includes("question_set_draft"),
+  "quote-job fulfillment_mode must NOT include question_set_draft (crawler stays a separate discovery job)"
+);
+
+const evidenceAnswer = {
+  schema_version: "1.0",
+  answer_id: "ans_1",
+  answer: "Based on reviewed sources, E&O covers professional negligence claims.",
+  scope: "general",
+  evidence_status: "supported",
+  as_of_date: "2026-06-26",
+  claims: [{ claim_id: "c1", text: "E&O covers negligence.", support: "direct", citation_ids: ["cit1"] }],
+  citations: [{ citation_id: "cit1", source_label: "Reviewed PL guidance" }],
+  disclaimer: "AI can make mistakes. Speak with a licensed agent to confirm."
+};
+assert.equal(validateEvidenceAnswer(evidenceAnswer), true, JSON.stringify(validateEvidenceAnswer.errors, null, 2));
+
+const badStatus = { ...evidenceAnswer, evidence_status: "definitely_true" };
+assert.equal(validateEvidenceAnswer(badStatus), false, "evidence_status is a closed enum");
+
+assert.equal(validateKnowledgeContext({ line_of_business: "professional_liability", profession: "real_estate_agent" }), true);
+assert.equal(validateKnowledgeContext({ profession: "real_estate_agent" }), false, "knowledge-context requires line_of_business");
+
+const crawlerJob = {
+  schema_version: "1.0",
+  discovery_job_id: "disc_1",
+  job_type: "question_set_discovery",
+  line_of_business: "professional_liability",
+  profession: "real_estate_agent",
+  target_carriers: ["amwins_carrier_a"],
+  review_required: true
+};
+assert.equal(validateCrawlerJob(crawlerJob), true, JSON.stringify(validateCrawlerJob.errors, null, 2));
+assert.equal(validateCrawlerJob({ ...crawlerJob, review_required: false }), false, "discovery jobs are always review_required:true");
+
+const evidencePacket = {
+  schema_version: "1.0",
+  evidence_packet_id: "ep_1",
+  intent: "general_education",
+  controlling_lane: "reviewed_guidance",
+  as_of_date: "2026-06-26",
+  slots: { line_of_business: "professional_liability", profession: "real_estate_agent" },
+  candidates: [{ chunk_id: "ch1", authority_tier: "reviewed_guidance", visibility: "public", text: "...", vector_dim: 1536 }]
+};
+assert.equal(validateEvidencePacket(evidencePacket), true, JSON.stringify(validateEvidencePacket.errors, null, 2));
+// Firestore vector ceiling guard (F1/F8): vector_dim > 2048 must fail.
+assert.equal(
+  validateEvidencePacket({ ...evidencePacket, candidates: [{ chunk_id: "ch1", authority_tier: "reviewed_guidance", visibility: "public", text: "...", vector_dim: 3072 }] }),
+  false,
+  "evidence-packet candidate vector_dim must not exceed 2048 (Firestore limit)"
+);
+
 console.log("PolicyGPT contract smoke tests passed.");
