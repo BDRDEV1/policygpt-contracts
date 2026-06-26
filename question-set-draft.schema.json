@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/contracts/question-set-draft.schema.json",
+  "title": "PolicyGPT Question-Set Draft (UW Crawler -> Coordinator)",
+  "description": "Output of the rater's UW question-collection crawler: a DRAFT question set for a line+profession, harvested from a carrier portal. Always requires human/AI normalization before it becomes a live question set (architecture plan section 3.2). Single source of truth; vendored, not hand-copied.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_type",
+    "line_of_business",
+    "profession",
+    "source_carrier",
+    "questions"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+    "event_type": { "const": "policygpt.comparative_rater.question_set.drafted" },
+    "draft_id": { "type": "string" },
+    "line_of_business": { "type": "string", "description": "slug, e.g. professional_liability" },
+    "profession": { "type": "string", "description": "slug, e.g. home_inspector" },
+    "source_carrier": { "type": "string", "description": "carrier key the questions were harvested from" },
+    "collected_at": { "type": "string", "description": "ISO 8601 timestamp" },
+    "needs_review": {
+      "type": "boolean",
+      "default": true,
+      "description": "Drafts are ALWAYS reviewed (human or AI) before going live."
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "prompt", "answer_type"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "prompt": { "type": "string", "description": "the question text as shown on the carrier site" },
+          "answer_type": {
+            "enum": ["yes_no", "single_select", "multi_select", "currency", "number", "date", "phone", "email", "address", "text"],
+            "description": "Reuses the existing card/answer-type contract (architecture plan section 3.2)."
+          },
+          "required": { "type": "boolean" },
+          "options": {
+            "type": "array",
+            "description": "ALL option values for single_select/multi_select/radio/checkbox (label + value).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "label": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            }
+          },
+          "validation": { "type": "object", "description": "min/max/pattern etc. inferred from the field" },
+          "source_selector": { "type": "string", "description": "the carrier-site selector this was read from (seeds the carrier module's field map)" },
+          "raw_label": { "type": "string" },
+          "screenshot": { "type": "string", "description": "GCS pointer to a screenshot of this question for review" },
+          "confidence": { "type": "number", "description": "0-1, how confident the crawler/AI is in this classification" },
+          "notes": { "type": "string" },
+          "needs_new_component": { "type": "boolean", "description": "TRUE if this question's answer_type has no matching quick-answer card component yet — flags exactly which new components to request from Claude Design. The agents must NOT invent a card." }
+        }
+      }
+    }
+  }
+}

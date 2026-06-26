@@ -49,11 +49,39 @@ paths:
               schema:
                 type: object
                 properties:
-                  status: { type: string, enum: [queued, claimed, running, completed, failed] }
+                  status: { type: string, enum: [queued, claimed, running, awaiting_carrier_answer, completed, failed] }
                   stage: { type: string, description: "Human-readable stage label e.g. 'Checking Carrier A…'" }
                   progress: { type: integer, minimum: 0, maximum: 100 }
+                  pending_question:
+                    $ref: "#/components/schemas/PendingCarrierQuestion"
+                    description: "Present when a carrier asked an unexpected question; the plugin renders this card on the processing screen and posts the answer to /quote/{id}/carrier-answer."
         "404":
           description: Session/job not found
+  /quote/{id}/carrier-answer:
+    post:
+      tags: [plugin]
+      summary: Submit the user's answer to a live carrier question (adaptive flow)
+      description: "When GET /quote/{id}/status returns a pending_question, the plugin renders the card on the processing screen, the user answers, and the plugin posts it here. The Coordinator queues it and hands it to the rater on its next heartbeat (pending_answer). The Q+A is persisted to the profession's question set so it isn't asked again. Adaptive Rater Intelligence."
+      security:
+        - pluginHmac: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question_id, answer]
+              properties:
+                question_id: { type: string }
+                answer: {}
+      responses:
+        "200":
+          description: Answer accepted and queued for the rater
   /quote/{id}/pin/verify:
     post:
       tags: [guest]
@@ -278,14 +306,39 @@ paths:
   /rater/jobs/{job_id}/heartbeat:
     post:
       tags: [rater]
-      summary: Extend a claimed job lease and report progress
+      summary: Extend a claimed job lease, report progress, and exchange live carrier questions
+      description: "Worker->Coordinator. Carries progress/stage/carrier. ADAPTIVE: if a carrier shows an unexpected required field the rater can't answer from the job data, the rater includes pending_question (classified into one of our answer-card types by the Sonnet-vision adaptive engine); the Coordinator surfaces it to the plugin via GET /quote/{id}/status. The RESPONSE returns pending_answer once the user has answered, which the rater enters on the carrier site. Plan 6.8 + Adaptive Rater Intelligence."
       security:
         - workerHmac: []
       parameters:
         - $ref: "#/components/parameters/JobId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                progress: { type: integer, minimum: 0, maximum: 100 }
+                stage: { type: string }
+                carrier: { type: string }
+                pending_question:
+                  $ref: "#/components/schemas/PendingCarrierQuestion"
       responses:
         "200":
-          description: Heartbeat accepted
+          description: Heartbeat accepted; may include a pending_answer for a previously-surfaced carrier question
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ack: { type: boolean }
+                  pending_answer:
+                    type: object
+                    description: "Present once the user answered a live carrier question; the rater enters this value on the carrier site."
+                    properties:
+                      question_id: { type: string }
+                      answer: {}
   /rater/jobs/{job_id}/complete:
     post:
       tags: [rater]
@@ -332,6 +385,24 @@ paths:
       responses:
         "200":
           description: Worker heartbeat accepted
+  /rater/jobs/{job_id}/question-set-draft:
+    post:
+      tags: [rater]
+      summary: Submit a UW question-set draft harvested by the question-collection crawler
+      description: "When a job runs in fulfillment_mode 'question_set_draft', the rater crawls the carrier flow and posts the harvested questions here (event policygpt.comparative_rater.question_set.drafted). Always reviewed (human/AI) before going live via PUT /admin/lines/{line}/professions/{profession}. Plan 3.2, 11.1 + Adaptive Rater Intelligence."
+      security:
+        - workerHmac: []
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./question-set-draft.schema.json"
+      responses:
+        "200":
+          description: Draft accepted for review
 components:
   securitySchemes:
     pluginHmac:
@@ -351,3 +422,29 @@ components:
       required: true
       schema:
         type: string
+  schemas:
+    PendingCarrierQuestion:
+      type: object
+      description: "A carrier asked a question the rater isn't mapped for. The Sonnet-vision adaptive engine classified it into one of our answer-card types so the plugin can render it on the processing screen. Reuses the answer_type enum (plan 3.2)."
+      required: [question_id, prompt, answer_type]
+      properties:
+        question_id: { type: string }
+        carrier: { type: string }
+        prompt: { type: string }
+        answer_type:
+          type: string
+          enum: [yes_no, single_select, multi_select, currency, number, date, phone, email, address, text]
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              label: { type: string }
+              value: { type: string }
+        required: { type: boolean }
+        needs_new_component:
+          type: boolean
+          description: "TRUE if this question's answer_type has NO matching quick-answer card component in the design kit yet. The plugin shows a graceful fallback and the system FLAGS it to the operator (rater console + a notice) so a new component can be requested from Claude Design. The agents must NOT invent a card."
+        proposed_component:
+          type: string
+          description: "Short description of the card component that would be needed, to send to Claude Design."
