@@ -1,0 +1,64 @@
+{
+  "schema_version": "policygpt.research_import_bundle.v2",
+  "research_run": {
+    "research_job_id": "research_0",
+    "topic": "Real estate agent E&O policy forms (CA)",
+    "line_of_business": "professional_liability",
+    "generated_at": "2026-06-26T00:00:00Z",
+    "as_of_date": "2026-06-26",
+    "default_review_status": "unreviewed",
+    "target_corpus_id": "public_professional_liability_real_estate_agent"
+  },
+  "source_urls": [
+    {
+      "url_id": "url_0",
+      "url": "https://example.com/x.pdf",
+      "normalized_url": "x",
+      "access_status": "public_pdf_verified",
+      "result_category": "policy_form_pdf",
+      "date_found": "2026-06-26",
+      "date_verified": "2026-06-26",
+      "first_seen_at": "2026-06-26T00:00:00Z",
+      "checked_at_research": "2026-06-26T00:00:00Z",
+      "should_check_for_updates": false,
+      "rights_status": "public_access"
+    }
+  ],
+  "documents": [
+    {
+      "document_id": "doc_0",
+      "document_number": "D-00000000",
+      "canonical_title": "Example RE Agents E&O Policy Form",
+      "line_of_business": "professional_liability",
+      "policy_type": "errors_and_omissions",
+      "policy_subtype": "real_estate_professional_liability",
+      "profession_type": "real_estate_professional",
+      "business_type": "real_estate_agent",
+      "source_type": "public_filing",
+      "authority_tier": "statute",
+      "review_status": "unreviewed",
+      "rights_status": "public_access",
+      "policy_role": "base_policy_form",
+      "document_type": "pdf_policy_form",
+      "source_url": "https://example.com/x.pdf",
+      "parent_page_url": "https://example.com/x.pdf",
+      "access_status": "public_pdf_verified",
+      "date_found": "2026-06-26",
+      "date_verified": "2026-06-26",
+      "source_confidence": "high",
+      "needs_manual_review": false
+    }
+  ],
+  "download_manifest": [
+    {
+      "manifest_id": "manifest_0",
+      "source_url": "https://example.com/x.pdf",
+      "retrieval_intent": "download_pdf",
+      "expected_mime_type": "application/pdf",
+      "requires_manual_terms_acceptance": false,
+      "rights_status": "public_access",
+      "parse_requested": false,
+      "target_visibility": "public"
+    }
+  ]
+}

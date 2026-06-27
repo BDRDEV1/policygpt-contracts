@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://policygpt.com/schemas/policygpt.research_import_bundle.v1.schema.json",
-  "title": "PolicyGPT Research Import Bundle",
-  "description": "Machine-ingestible Deep Research output for PolicyGPT Command Center corpus ingestion. The bundle stages URLs, document candidates, endorsement/exclusion catalogs, and download/parse instructions. Nothing in this bundle is reviewed or customer-citable by default.",
+  "$id": "https://policygpt.com/schemas/policygpt.research_import_bundle.v2.schema.json",
+  "title": "PolicyGPT Research Import Bundle v2",
+  "description": "Machine-ingestible research import bundle for PolicyGPT corpus ingestion. Version 2 adds stable/provisional D-number and G-number support, source-occurrence grouping, program/risk-class/form-family objects, coverage terms, webpage references, change tracking, and markdown sync tracking. Nothing in this bundle is reviewed or customer-citable by default.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -14,368 +14,298 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "policygpt.research_import_bundle.v1"
+      "const": "policygpt.research_import_bundle.v2"
     },
     "research_run": {
       "$ref": "#/$defs/research_run"
+    },
+    "id_registry": {
+      "$ref": "#/$defs/id_registry"
     },
     "summary": {
       "$ref": "#/$defs/summary"
     },
     "source_urls": {
       "type": "array",
-      "items": { "$ref": "#/$defs/source_url" },
+      "items": {
+        "$ref": "#/$defs/source_url"
+      },
+      "default": []
+    },
+    "source_occurrences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source_occurrence"
+      },
+      "default": []
+    },
+    "webpage_references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/webpage_reference"
+      },
+      "default": []
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/group_record"
+      },
+      "default": []
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/program_record"
+      },
+      "default": []
+    },
+    "risk_classes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/risk_class"
+      },
+      "default": []
+    },
+    "form_families": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/form_family"
+      },
+      "default": []
+    },
+    "policy_packages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/policy_package"
+      },
       "default": []
     },
     "documents": {
       "type": "array",
-      "items": { "$ref": "#/$defs/document_candidate" },
+      "items": {
+        "$ref": "#/$defs/document_candidate"
+      },
       "default": []
     },
     "endorsements": {
       "type": "array",
-      "items": { "$ref": "#/$defs/endorsement_record" },
+      "items": {
+        "$ref": "#/$defs/endorsement_record"
+      },
       "default": []
     },
     "exclusions": {
       "type": "array",
-      "items": { "$ref": "#/$defs/exclusion_record" },
+      "items": {
+        "$ref": "#/$defs/exclusion_record"
+      },
+      "default": []
+    },
+    "coverage_terms": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/coverage_term"
+      },
       "default": []
     },
     "download_manifest": {
       "type": "array",
-      "items": { "$ref": "#/$defs/download_item" },
+      "items": {
+        "$ref": "#/$defs/download_item"
+      },
       "default": []
     },
     "relationships": {
       "type": "array",
-      "items": { "$ref": "#/$defs/relationship" },
+      "items": {
+        "$ref": "#/$defs/relationship"
+      },
+      "default": []
+    },
+    "change_log": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/change_event"
+      },
+      "default": []
+    },
+    "markdown_outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/markdown_output"
+      },
       "default": []
     },
     "research_notes_markdown": {
       "type": "string",
-      "description": "Optional embedded copy of research_notes.md. Prefer also storing the original markdown in the vault."
+      "description": "Optional embedded copy of research_notes.md. Prefer storing generated markdown separately in the vault."
     }
   },
   "$defs": {
-    "research_run": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "research_job_id",
-        "topic",
-        "line_of_business",
-        "profession",
-        "generated_at",
-        "as_of_date",
-        "default_review_status",
-        "target_corpus_id"
+    "line_of_business": {
+      "type": "string",
+      "enum": [
+        "professional_liability"
+      ]
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "unreviewed",
+        "manual_review",
+        "reviewed",
+        "rejected"
       ],
-      "properties": {
-        "research_job_id": { "type": "string", "pattern": "^research_[A-Za-z0-9_\\-]+$" },
-        "topic": { "type": "string" },
-        "line_of_business": { "type": "string", "enum": ["professional_liability"] },
-        "profession": { "type": "string" },
-        "jurisdiction_scope": { "type": "string", "default": "US" },
-        "target_corpus_id": { "type": "string", "default": "public_professional_liability_real_estate_agent" },
-        "generated_by": { "type": "string", "default": "deep_research" },
-        "generated_at": { "type": "string", "format": "date-time" },
-        "as_of_date": { "type": "string", "format": "date" },
-        "prompt_version": { "type": "string" },
-        "prompt_sha256": { "type": "string" },
-        "default_review_status": { "const": "unreviewed" },
-        "default_retrieval_status": { "type": "string", "enum": ["disabled"], "default": "disabled" },
-        "researcher_notes": { "type": "string" }
-      }
+      "default": "unreviewed"
     },
-    "summary": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "total_source_urls": { "type": "integer", "minimum": 0 },
-        "total_documents": { "type": "integer", "minimum": 0 },
-        "total_download_items": { "type": "integer", "minimum": 0 },
-        "total_policy_forms": { "type": "integer", "minimum": 0 },
-        "total_endorsements": { "type": "integer", "minimum": 0 },
-        "total_exclusions": { "type": "integer", "minimum": 0 },
-        "notable_gaps": { "type": "array", "items": { "type": "string" }, "default": [] },
-        "rights_or_access_issues": { "type": "array", "items": { "type": "string" }, "default": [] },
-        "recommended_next_research": { "type": "array", "items": { "type": "string" }, "default": [] }
-      }
-    },
-    "source_url": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "url_id",
-        "url",
-        "normalized_url",
-        "url_status",
-        "result_category",
-        "first_seen_at",
-        "checked_at_research",
-        "should_check_for_updates"
+    "retrieval_status": {
+      "type": "string",
+      "enum": [
+        "disabled"
       ],
-      "properties": {
-        "url_id": { "type": "string", "pattern": "^url_[A-Za-z0-9_\\-]+$" },
-        "url": { "type": "string", "format": "uri" },
-        "normalized_url": { "type": "string" },
-        "final_url": { "type": ["string", "null"], "format": "uri" },
-        "source_domain": { "type": ["string", "null"] },
-        "source_page_title": { "type": ["string", "null"] },
-        "content_type_guess": { "type": "string", "enum": ["pdf", "html", "filing_record", "search_result", "unknown"] },
-        "result_category": {
-          "type": "string",
-          "enum": [
-            "policy_form_pdf",
-            "endorsement_pdf",
-            "exclusion_pdf",
-            "forms_schedule_pdf",
-            "endorsement_listing_page",
-            "exclusion_listing_page",
-            "carrier_product_page",
-            "program_admin_page",
-            "public_filing_record",
-            "reference_only",
-            "duplicate",
-            "out_of_scope_reviewed",
-            "dead_or_bad_link",
-            "gated_or_manual"
-          ]
-        },
-        "line_of_business": { "type": ["string", "null"], "default": "professional_liability" },
-        "profession": { "type": ["string", "null"] },
-        "jurisdiction": { "type": ["string", "null"] },
-        "carrier": { "type": ["string", "null"] },
-        "program_administrator": { "type": ["string", "null"] },
-        "product_name": { "type": ["string", "null"] },
-        "form_number": { "type": ["string", "null"] },
-        "edition_date": { "type": ["string", "null"] },
-        "policy_role": { "$ref": "#/$defs/policy_role_nullable" },
-        "linked_document_id": { "type": ["string", "null"] },
-        "duplicate_of_url_id": { "type": ["string", "null"] },
-        "url_status": {
-          "type": "string",
-          "enum": [
-            "direct_pdf_verified",
-            "html_page_verified",
-            "filing_record_verified",
-            "reference_only_no_pdf",
-            "session_based_access",
-            "gated",
-            "dead_or_redirect_bad",
-            "not_opened",
-            "out_of_scope"
-          ]
-        },
-        "access_method": {
-          "type": "string",
-          "enum": ["direct_http", "browser", "manual_serff", "manual_terms_acceptance", "reference_only", "skip", "unknown"]
-        },
-        "rights_status": { "$ref": "#/$defs/rights_status" },
-        "first_seen_query": { "type": ["string", "null"] },
-        "first_seen_at": { "type": "string", "format": "date-time" },
-        "checked_at_research": { "type": "string", "format": "date-time" },
-        "as_of_date": { "type": ["string", "null"], "format": "date" },
-        "should_check_for_updates": { "type": "boolean" },
-        "check_frequency_days": { "type": ["integer", "null"], "enum": [7, 30, 90, 180, null] },
-        "rejection_reason": { "type": ["string", "null"] },
-        "notes": { "type": ["string", "null"] }
-      }
+      "default": "disabled"
     },
-    "document_candidate": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "document_id",
-        "canonical_title",
-        "line_of_business",
-        "profession",
-        "source_type",
-        "authority_tier",
-        "review_status",
-        "rights_status",
-        "policy_role",
-        "document_type",
-        "source_url",
-        "url_status",
+    "yes_no_unknown": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "no",
+        "unknown"
+      ]
+    },
+    "yes_partial_no_unknown": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "partial",
+        "no",
+        "unknown"
+      ]
+    },
+    "source_confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "document_number": {
+      "type": "string",
+      "pattern": "^(D-[0-9]{8}|D-TEMP-[A-Za-z0-9_\\-]+-[0-9]{6})$",
+      "description": "Permanent D-number or research-run provisional D-TEMP number. Do not encode mutable metadata in this value."
+    },
+    "canonical_document_number_nullable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^D-[0-9]{8}$"
+    },
+    "group_number": {
+      "type": "string",
+      "pattern": "^(G-[0-9]{8}|G-TEMP-[A-Za-z0-9_\\-]+-[0-9]{6})$",
+      "description": "Permanent G-number or research-run provisional G-TEMP group number."
+    },
+    "group_number_nullable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^(G-[0-9]{8}|G-TEMP-[A-Za-z0-9_\\-]+-[0-9]{6})$"
+    },
+    "document_number_array": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/document_number"
+      },
+      "default": []
+    },
+    "group_number_array": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/group_number"
+      },
+      "default": []
+    },
+    "id_array": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "research_row_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^R-[0-9]{6}$"
+    },
+    "record_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "superseded",
+        "merged",
+        "split",
+        "retired",
+        "rejected",
         "needs_manual_review"
       ],
-      "properties": {
-        "document_id": { "type": "string", "pattern": "^doc_[A-Za-z0-9_\\-]+$" },
-        "canonical_title": { "type": "string" },
-        "line_of_business": { "type": "string", "enum": ["professional_liability"] },
-        "profession": { "type": "string" },
-        "covered_professional_services": { "type": ["string", "null"] },
-        "activity_scope_tags": { "type": "array", "items": { "$ref": "#/$defs/activity_scope_tag" }, "default": [] },
-        "jurisdiction": { "type": ["string", "null"], "default": "US" },
-        "state_filing_state": { "type": ["string", "null"] },
-        "country": { "type": "string", "default": "US" },
-        "source_type": { "$ref": "#/$defs/source_type" },
-        "authority_tier": { "$ref": "#/$defs/authority_tier" },
-        "review_status": { "const": "unreviewed" },
-        "retrieval_status": { "type": "string", "enum": ["disabled"], "default": "disabled" },
-        "rights_status": { "$ref": "#/$defs/rights_status" },
-        "source_label": { "type": ["string", "null"] },
-        "source_url": { "type": "string", "format": "uri" },
-        "canonical_pdf_url": { "type": ["string", "null"], "format": "uri" },
-        "alternate_urls": { "type": "array", "items": { "type": "string" }, "default": [] },
-        "url_status": { "type": "string" },
-        "access_method": { "type": "string" },
-        "as_of_date": { "type": ["string", "null"], "format": "date" },
-        "retrieved_at_research": { "type": ["string", "null"], "format": "date-time" },
-        "issuer_type": { "type": ["string", "null"] },
-        "carrier": { "type": ["string", "null"] },
-        "underwriting_company": { "type": ["string", "null"] },
-        "naic_company_code": { "type": ["string", "null"] },
-        "program_administrator": { "type": ["string", "null"] },
-        "broker_or_mga": { "type": ["string", "null"] },
-        "product_name": { "type": ["string", "null"] },
-        "program_name": { "type": ["string", "null"] },
-        "form_title": { "type": ["string", "null"] },
-        "form_number": { "type": ["string", "null"] },
-        "edition_date": { "type": ["string", "null"] },
-        "revision_date": { "type": ["string", "null"] },
-        "effective_from": { "type": ["string", "null"], "format": "date" },
-        "effective_to": { "type": ["string", "null"], "format": "date" },
-        "serff_tracking_number": { "type": ["string", "null"] },
-        "filing_number": { "type": ["string", "null"] },
-        "filing_status": { "type": ["string", "null"] },
-        "filing_date": { "type": ["string", "null"], "format": "date" },
-        "filing_type": { "type": ["string", "null"] },
-        "policy_role": { "$ref": "#/$defs/policy_role" },
-        "document_type": { "$ref": "#/$defs/document_type" },
-        "claims_basis": { "type": ["string", "null"] },
-        "state_specific": { "type": ["boolean", "null"] },
-        "iso_or_advisory_reference": { "type": ["boolean", "null"] },
-        "carrier_modified": { "type": ["boolean", "null"] },
-        "parent_form_number": { "type": ["string", "null"] },
-        "replaces_form_number": { "type": ["string", "null"] },
-        "parser_priority": { "type": "string", "enum": ["high", "normal", "low", "skip"], "default": "normal" },
-        "needs_manual_review": { "type": "boolean" },
-        "researcher_notes": { "type": ["string", "null"] }
-      }
+      "default": "active"
     },
-    "download_item": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "manifest_id",
-        "document_id",
-        "source_url",
-        "retrieval_intent",
-        "expected_mime_type",
-        "requires_manual_terms_acceptance",
-        "rights_status",
-        "parse_requested",
-        "target_visibility"
-      ],
-      "properties": {
-        "manifest_id": { "type": "string", "pattern": "^manifest_[A-Za-z0-9_\\-]+$" },
-        "document_id": { "type": "string" },
-        "url_id": { "type": ["string", "null"] },
-        "source_url": { "type": "string", "format": "uri" },
-        "canonical_pdf_url": { "type": ["string", "null"], "format": "uri" },
-        "retrieval_intent": { "type": "string", "enum": ["download_pdf", "snapshot_html", "manual_download", "reference_only_skip_download"] },
-        "expected_mime_type": { "type": "string", "enum": ["application/pdf", "text/html", "unknown"] },
-        "preferred_filename": { "type": ["string", "null"] },
-        "target_visibility": { "type": "string", "enum": ["public", "tenant_private", "internal_only"] },
-        "source_type": { "$ref": "#/$defs/source_type" },
-        "authority_tier": { "$ref": "#/$defs/authority_tier" },
-        "rights_status": { "$ref": "#/$defs/rights_status" },
-        "access_method": { "type": "string" },
-        "rate_limit_group": { "type": ["string", "null"] },
-        "requires_manual_terms_acceptance": { "type": "boolean" },
-        "parse_requested": { "type": "boolean" },
-        "parser_profile": { "type": "string", "enum": ["policy_pdf", "endorsement_pdf", "exclusion_pdf", "forms_schedule", "web_listing", "generic_pdf", "skip"], "default": "policy_pdf" },
-        "gcs_target_original": { "type": ["string", "null"] },
-        "metadata_sidecar_target": { "type": ["string", "null"] },
-        "parse_targets": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "metadata_json": { "type": ["string", "null"] },
-            "pages_json": { "type": ["string", "null"] },
-            "clauses_json": { "type": ["string", "null"] },
-            "chunks_json": { "type": ["string", "null"] },
-            "markdown": { "type": ["string", "null"] },
-            "parse_report_json": { "type": ["string", "null"] },
-            "source_links_json": { "type": ["string", "null"] }
-          }
-        },
-        "notes": { "type": ["string", "null"] }
-      }
+    "record_type": {
+      "type": "string",
+      "enum": [
+        "document",
+        "endorsement",
+        "exclusion",
+        "forms_schedule",
+        "program_page",
+        "product_page",
+        "source_occurrence",
+        "filing_record",
+        "risk_class_evidence",
+        "coverage_term_evidence",
+        "webpage_reference",
+        "parent_page",
+        "unknown"
+      ]
     },
-    "endorsement_record": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["endorsement_id", "endorsement_name", "review_status", "rights_status"],
-      "properties": {
-        "endorsement_id": { "type": "string", "pattern": "^end_[A-Za-z0-9_\\-]+$" },
-        "endorsement_name": { "type": "string" },
-        "form_number": { "type": ["string", "null"] },
-        "edition_date": { "type": ["string", "null"] },
-        "jurisdiction": { "type": ["string", "null"] },
-        "carrier": { "type": ["string", "null"] },
-        "program_administrator": { "type": ["string", "null"] },
-        "product_name": { "type": ["string", "null"] },
-        "policy_role": { "$ref": "#/$defs/policy_role_nullable" },
-        "endorsement_category": { "type": ["string", "null"] },
-        "optional_or_mandatory": { "type": ["string", "null"], "enum": ["optional", "mandatory", "state_mandatory", "unknown", null] },
-        "coverage_effect": { "type": ["string", "null"] },
-        "activity_scope_tags": { "type": "array", "items": { "$ref": "#/$defs/activity_scope_tag" }, "default": [] },
-        "source_url": { "type": ["string", "null"], "format": "uri" },
-        "pdf_url": { "type": ["string", "null"], "format": "uri" },
-        "document_id": { "type": ["string", "null"] },
-        "page_or_section_reference": { "type": ["string", "null"] },
-        "as_of_date": { "type": ["string", "null"], "format": "date" },
-        "review_status": { "const": "unreviewed" },
-        "rights_status": { "$ref": "#/$defs/rights_status" },
-        "notes": { "type": ["string", "null"] }
-      }
+    "access_status": {
+      "type": "string",
+      "enum": [
+        "public_pdf_verified",
+        "public_html_verified",
+        "filing_record_verified",
+        "reference_only_no_document",
+        "session_based_access",
+        "gated",
+        "login_required",
+        "dead_or_redirect_bad",
+        "not_opened",
+        "out_of_scope",
+        "unknown"
+      ]
     },
-    "exclusion_record": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["exclusion_id", "exclusion_name", "review_status", "rights_status"],
-      "properties": {
-        "exclusion_id": { "type": "string", "pattern": "^exc_[A-Za-z0-9_\\-]+$" },
-        "exclusion_name": { "type": "string" },
-        "form_number": { "type": ["string", "null"] },
-        "edition_date": { "type": ["string", "null"] },
-        "jurisdiction": { "type": ["string", "null"] },
-        "carrier": { "type": ["string", "null"] },
-        "program_administrator": { "type": ["string", "null"] },
-        "product_name": { "type": ["string", "null"] },
-        "exclusion_category": { "type": ["string", "null"] },
-        "standalone_or_embedded": { "type": ["string", "null"], "enum": ["standalone", "embedded", "unknown", null] },
-        "coverage_effect": { "type": ["string", "null"] },
-        "activity_scope_tags": { "type": "array", "items": { "$ref": "#/$defs/activity_scope_tag" }, "default": [] },
-        "source_url": { "type": ["string", "null"], "format": "uri" },
-        "pdf_url": { "type": ["string", "null"], "format": "uri" },
-        "document_id": { "type": ["string", "null"] },
-        "page_or_section_reference": { "type": ["string", "null"] },
-        "as_of_date": { "type": ["string", "null"], "format": "date" },
-        "review_status": { "const": "unreviewed" },
-        "rights_status": { "$ref": "#/$defs/rights_status" },
-        "notes": { "type": ["string", "null"] }
-      }
-    },
-    "relationship": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["relationship_id", "relationship_type", "from_id", "to_id"],
-      "properties": {
-        "relationship_id": { "type": "string", "pattern": "^rel_[A-Za-z0-9_\\-]+$" },
-        "relationship_type": {
-          "type": "string",
-          "enum": ["duplicate_of", "alternate_url_for", "endorsement_to_policy", "exclusion_to_policy", "replaces", "replaced_by", "same_form_family", "SERFF_record_for", "source_page_for"]
-        },
-        "from_id": { "type": "string" },
-        "to_id": { "type": "string" },
-        "confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.75 },
-        "notes": { "type": ["string", "null"] }
-      }
+    "rights_status": {
+      "type": "string",
+      "enum": [
+        "public_access",
+        "public_access_with_copyright_notice",
+        "carrier_public_marketing",
+        "filing_public_access",
+        "license_required_or_iso_reference_only",
+        "terms_gated",
+        "login_required",
+        "confidential_or_not_public",
+        "unknown",
+        "do_not_ingest"
+      ]
     },
     "source_type": {
       "type": "string",
@@ -384,6 +314,8 @@
         "carrier_public",
         "program_administrator_public",
         "broker_public",
+        "wholesale_broker_public",
+        "MGA_public",
         "advisory_org_reference",
         "law_regulation",
         "reviewed_guidance",
@@ -403,24 +335,64 @@
         "carrier_form",
         "carrier_public_web",
         "program_admin_public_web",
+        "MGA_public_web",
+        "wholesale_broker_public_web",
         "broker_public_web",
         "secondary_guidance",
         "unreviewed_reference"
       ]
     },
-    "rights_status": {
+    "access_method": {
       "type": "string",
       "enum": [
-        "public_access",
-        "public_access_with_copyright_notice",
-        "carrier_public_marketing",
-        "filing_public_access",
-        "license_required_or_iso_reference_only",
-        "terms_gated",
-        "login_required",
-        "confidential_or_not_public",
-        "unknown",
-        "do_not_ingest"
+        "direct_http",
+        "browser",
+        "manual_serff",
+        "manual_terms_acceptance",
+        "reference_only",
+        "snapshot_html",
+        "skip",
+        "unknown"
+      ]
+    },
+    "content_type_guess": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "html",
+        "doc",
+        "docx",
+        "filing_record",
+        "search_result",
+        "unknown"
+      ]
+    },
+    "result_category": {
+      "type": "string",
+      "enum": [
+        "policy_form_pdf",
+        "policy_language_webpage",
+        "endorsement_pdf",
+        "exclusion_pdf",
+        "forms_schedule_pdf",
+        "endorsement_listing_page",
+        "exclusion_listing_page",
+        "webpage_exclusion_list",
+        "webpage_endorsement_list",
+        "webpage_limits_list",
+        "carrier_product_page",
+        "program_admin_page",
+        "broker_program_page",
+        "MGA_program_page",
+        "wholesale_broker_page",
+        "public_filing_record",
+        "source_occurrence",
+        "reference_only",
+        "duplicate",
+        "out_of_scope_reviewed",
+        "dead_or_bad_link",
+        "gated_or_manual",
+        "unknown"
       ]
     },
     "policy_role": {
@@ -431,6 +403,7 @@
         "declarations_sample",
         "endorsement",
         "exclusion_endorsement",
+        "exclusion_amendment",
         "mandatory_state_endorsement",
         "notice",
         "application",
@@ -438,16 +411,26 @@
         "underwriting_questionnaire",
         "rating_rule",
         "specimen_policy",
+        "policy_jacket",
+        "coverage_part",
         "marketing_summary",
+        "webpage_policy_language",
         "webpage_endorsement_list",
         "webpage_exclusion_list",
-        "reference_only"
+        "webpage_limits_or_sublimits_list",
+        "program_reference_page",
+        "reference_only",
+        "unknown"
       ]
     },
     "policy_role_nullable": {
       "anyOf": [
-        { "$ref": "#/$defs/policy_role" },
-        { "type": "null" }
+        {
+          "$ref": "#/$defs/policy_role"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "document_type": {
@@ -457,11 +440,281 @@
         "pdf_endorsement",
         "pdf_exclusion",
         "pdf_forms_schedule",
+        "pdf_specimen_policy",
         "html_webpage",
         "html_snapshot",
+        "html_policy_language",
+        "html_exclusion_list",
+        "html_endorsement_list",
         "public_filing_record",
+        "doc_or_docx",
         "reference_only",
-        "other"
+        "other",
+        "unknown"
+      ]
+    },
+    "policy_type": {
+      "type": "string",
+      "enum": [
+        "errors_and_omissions",
+        "professional_liability",
+        "miscellaneous_professional_liability",
+        "management_liability",
+        "cyber_tech_eo",
+        "unknown"
+      ]
+    },
+    "policy_subtype": {
+      "type": "string",
+      "enum": [
+        "real_estate_professional_liability",
+        "real_estate_errors_and_omissions",
+        "property_management_errors_and_omissions",
+        "appraisers_errors_and_omissions",
+        "mortgage_brokers_errors_and_omissions",
+        "title_agents_errors_and_omissions",
+        "escrow_agents_errors_and_omissions",
+        "auctioneers_errors_and_omissions",
+        "business_brokers_errors_and_omissions",
+        "miscellaneous_professional_liability",
+        "technology_errors_and_omissions",
+        "lawyers_professional_liability",
+        "accountants_professional_liability",
+        "architects_engineers_professional_liability",
+        "healthcare_professional_liability",
+        "insurance_agents_errors_and_omissions",
+        "unknown"
+      ]
+    },
+    "profession_type": {
+      "type": "string",
+      "enum": [
+        "real_estate_professional",
+        "legal_professional",
+        "accounting_professional",
+        "design_professional",
+        "technology_professional",
+        "healthcare_professional",
+        "insurance_professional",
+        "consulting_professional",
+        "media_professional",
+        "miscellaneous_professional",
+        "unknown"
+      ]
+    },
+    "business_type": {
+      "type": "string",
+      "enum": [
+        "real_estate_agent",
+        "real_estate_broker",
+        "real_estate_brokerage_firm",
+        "property_manager",
+        "leasing_agent",
+        "real_estate_appraiser",
+        "broker_price_opinion_provider",
+        "mortgage_broker_or_loan_originator",
+        "title_agent_or_abstractor",
+        "escrow_or_closing_agent",
+        "notary",
+        "auctioneer",
+        "real_estate_consultant",
+        "referral_service",
+        "business_broker",
+        "association_or_franchise",
+        "real_estate_developer",
+        "real_estate_investor",
+        "owned_property_operator",
+        "other",
+        "unknown"
+      ]
+    },
+    "class_code_system": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "carrier_internal",
+        "program_internal",
+        "state_license_type",
+        "SERFF_rating_rule",
+        "NAICS",
+        "SIC",
+        "ISO_GL",
+        "other",
+        "unknown",
+        null
+      ]
+    },
+    "admitted_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "admitted",
+        "non_admitted",
+        "surplus_lines",
+        "unknown",
+        null
+      ]
+    },
+    "claims_basis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "claims_made",
+        "claims_made_and_reported",
+        "occurrence",
+        "unknown",
+        null
+      ]
+    },
+    "optional_or_mandatory": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "optional",
+        "mandatory",
+        "state_mandatory",
+        "included",
+        "unknown",
+        null
+      ]
+    },
+    "coverage_effect": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "adds_coverage",
+        "restricts_coverage",
+        "adds_exclusion",
+        "deletes_exclusion",
+        "amends_exclusion",
+        "amends_definition",
+        "amends_professional_services_definition",
+        "amends_claims_reporting",
+        "amends_defense",
+        "adds_sublimit",
+        "adds_deductible_or_retention",
+        "state_amendatory",
+        "mandatory_notice",
+        "unknown",
+        null
+      ]
+    },
+    "import_action": {
+      "type": "string",
+      "enum": [
+        "import_candidate",
+        "download_candidate",
+        "snapshot_html",
+        "reference_only",
+        "skip",
+        "manual_review"
+      ],
+      "default": "import_candidate"
+    },
+    "parser_priority": {
+      "type": "string",
+      "enum": [
+        "high",
+        "normal",
+        "low",
+        "skip"
+      ],
+      "default": "normal"
+    },
+    "target_visibility": {
+      "type": "string",
+      "enum": [
+        "public",
+        "tenant_private",
+        "internal_only"
+      ],
+      "default": "internal_only"
+    },
+    "parser_profile": {
+      "type": "string",
+      "enum": [
+        "policy_pdf",
+        "endorsement_pdf",
+        "exclusion_pdf",
+        "forms_schedule",
+        "web_policy_language",
+        "web_exclusion_listing",
+        "web_endorsement_listing",
+        "web_limits_listing",
+        "web_listing",
+        "generic_pdf",
+        "skip"
+      ],
+      "default": "policy_pdf"
+    },
+    "duplicate_variant_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "exact_duplicate_no_new_context",
+        "exact_duplicate_new_source_context",
+        "same_base_form_different_profession",
+        "same_base_form_different_program",
+        "same_base_form_different_broker_mga_context",
+        "same_base_form_different_carrier_context",
+        "same_base_form_different_endorsement_bundle",
+        "same_base_form_different_exclusion_amendment",
+        "same_base_form_different_state_amendatory_endorsement",
+        "same_base_form_different_edition",
+        "same_form_family_materially_different_wording",
+        "related_endorsement",
+        "related_exclusion_amendment",
+        "related_professional_services_definition_endorsement",
+        "unique_document",
+        "unknown_relationship",
+        null
+      ]
+    },
+    "relationship_to_base_form": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "base_form",
+        "variant_of_base_form",
+        "endorsement_modifies_base_form",
+        "exclusion_modifies_base_form",
+        "state_amendatory",
+        "policy_package_member",
+        "source_occurrence",
+        "unknown",
+        null
+      ]
+    },
+    "group_type": {
+      "type": "string",
+      "enum": [
+        "form_family",
+        "policy_package",
+        "program",
+        "risk_class",
+        "business_class",
+        "carrier_product",
+        "source_occurrence_cluster",
+        "endorsement_bundle",
+        "exclusion_bundle",
+        "state_variant_group",
+        "duplicate_cluster",
+        "research_batch",
+        "unknown"
       ]
     },
     "activity_scope_tag": {
@@ -474,19 +727,3599 @@
         "appraisal_or_bpo",
         "mortgage_broker_or_loan_originator",
         "escrow_or_closing_services",
+        "title_or_abstract_services",
         "notary_services",
         "auctioneer_services",
         "real_estate_consulting",
         "referral_services",
         "business_brokerage",
         "real_estate_investment_or_owned_property",
+        "real_estate_development_or_construction",
         "association_or_franchise_services",
         "fair_housing_or_discrimination",
         "lockbox_or_open_house",
         "cyber_privacy_data_breach",
         "subpoena_or_disciplinary_proceeding",
+        "funds_handling_or_escrow",
         "unknown"
       ]
+    },
+    "exclusion_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "owned_property",
+        "property_management",
+        "mortgage_brokerage",
+        "investment_advice",
+        "securities",
+        "commingling_or_conversion",
+        "escrow_or_funds_handling",
+        "fair_housing_or_discrimination",
+        "pollution",
+        "bodily_injury_property_damage",
+        "prior_knowledge",
+        "prior_or_pending_litigation",
+        "contractual_liability",
+        "guarantees_or_warranties",
+        "profit_or_fee_disputes",
+        "intentional_or_dishonest_acts",
+        "criminal_acts",
+        "licensing_or_regulatory",
+        "appraisal_or_valuation",
+        "construction_development",
+        "syndication_or_investment",
+        "cyber_or_data_breach",
+        "employment_practices",
+        "insured_vs_insured",
+        "related_entities",
+        "unknown",
+        null
+      ]
+    },
+    "endorsement_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "property_management_services",
+        "fair_housing_discrimination_coverage",
+        "lockbox_coverage",
+        "open_house_coverage",
+        "sale_of_owned_property",
+        "appraisal_or_bpo_services",
+        "mortgage_broker_services",
+        "title_or_escrow_services",
+        "notary_services",
+        "cyber_privacy_data_breach",
+        "subpoena_assistance",
+        "disciplinary_proceeding",
+        "public_relations_expense",
+        "first_dollar_defense",
+        "deductible_reduction",
+        "extended_reporting_period",
+        "prior_acts",
+        "professional_services_definition",
+        "state_amendatory",
+        "unknown",
+        null
+      ]
+    },
+    "research_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "research_job_id",
+        "topic",
+        "line_of_business",
+        "generated_at",
+        "as_of_date",
+        "default_review_status",
+        "target_corpus_id"
+      ],
+      "properties": {
+        "research_job_id": {
+          "type": "string",
+          "pattern": "^research_[A-Za-z0-9_\\-]+$"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "line_of_business": {
+          "$ref": "#/$defs/line_of_business"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type_focus": {
+          "$ref": "#/$defs/business_type"
+        },
+        "jurisdiction_scope": {
+          "type": "string",
+          "default": "US"
+        },
+        "target_corpus_id": {
+          "type": "string",
+          "default": "public_professional_liability_real_estate_agent"
+        },
+        "generated_by": {
+          "type": "string",
+          "default": "deep_research"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "as_of_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_found_default": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "prompt_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prompt_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output_reference_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output_reference_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schema_source_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "seed_list_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "seed_list_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "default_review_status": {
+          "const": "unreviewed"
+        },
+        "default_retrieval_status": {
+          "$ref": "#/$defs/retrieval_status"
+        },
+        "researcher_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "id_registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_version",
+        "document_number_format",
+        "group_number_format",
+        "next_document_sequence",
+        "next_group_sequence"
+      ],
+      "properties": {
+        "registry_version": {
+          "type": "string",
+          "default": "policygpt.id_registry.v1"
+        },
+        "document_number_format": {
+          "type": "string",
+          "default": "D-{sequence:08d}"
+        },
+        "group_number_format": {
+          "type": "string",
+          "default": "G-{sequence:08d}"
+        },
+        "next_document_sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "next_group_sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reserved_document_numbers": {
+          "$ref": "#/$defs/document_number_array"
+        },
+        "reserved_group_numbers": {
+          "$ref": "#/$defs/group_number_array"
+        },
+        "retired_document_numbers": {
+          "$ref": "#/$defs/document_number_array"
+        },
+        "retired_group_numbers": {
+          "$ref": "#/$defs/group_number_array"
+        },
+        "registry_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "total_source_urls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_source_occurrences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_webpage_references": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_groups": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_documents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_policy_forms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_endorsements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_exclusions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_coverage_terms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unique_carriers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unique_brokers_mgas": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notable_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "rights_or_access_issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "recommended_next_research": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      }
+    },
+    "source_url": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url_id",
+        "url",
+        "normalized_url",
+        "access_status",
+        "result_category",
+        "date_found",
+        "date_verified",
+        "first_seen_at",
+        "checked_at_research",
+        "should_check_for_updates",
+        "rights_status"
+      ],
+      "properties": {
+        "url_id": {
+          "type": "string",
+          "pattern": "^url_[A-Za-z0-9_\\-]+$"
+        },
+        "research_row_id": {
+          "$ref": "#/$defs/research_row_id"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "normalized_url": {
+          "type": "string"
+        },
+        "final_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "source_domain": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_page_title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_type_guess": {
+          "$ref": "#/$defs/content_type_guess"
+        },
+        "result_category": {
+          "$ref": "#/$defs/result_category"
+        },
+        "record_type": {
+          "$ref": "#/$defs/record_type"
+        },
+        "line_of_business": {
+          "$ref": "#/$defs/line_of_business"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type": {
+          "$ref": "#/$defs/business_type"
+        },
+        "business_subtype": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "jurisdiction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "underwriting_company": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "broker_or_mga": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wholesale_broker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "product_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "edition_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "policy_role": {
+          "$ref": "#/$defs/policy_role_nullable"
+        },
+        "document_type": {
+          "$ref": "#/$defs/document_type"
+        },
+        "linked_document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "linked_document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "linked_group_number": {
+          "$ref": "#/$defs/group_number_nullable"
+        },
+        "duplicate_of_url_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "access_status": {
+          "$ref": "#/$defs/access_status"
+        },
+        "url_status": {
+          "$ref": "#/$defs/access_status"
+        },
+        "access_method": {
+          "$ref": "#/$defs/access_method"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "contains_policy_language": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "contains_exclusions": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "contains_endorsements": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "contains_limits_or_sublimits": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "first_seen_query": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "first_seen_seed_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_found": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_verified": {
+          "type": "string",
+          "format": "date"
+        },
+        "first_seen_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "checked_at_research": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "as_of_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "source_last_modified_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "should_check_for_updates": {
+          "type": "boolean"
+        },
+        "check_frequency_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            7,
+            30,
+            90,
+            180,
+            null
+          ]
+        },
+        "source_confidence": {
+          "$ref": "#/$defs/source_confidence"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rejection_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "source_occurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_occurrence_id",
+        "document_url",
+        "parent_page_url",
+        "date_found",
+        "date_verified",
+        "access_status",
+        "review_status"
+      ],
+      "properties": {
+        "source_occurrence_id": {
+          "type": "string",
+          "pattern": "^occ_[A-Za-z0-9_\\-]+$"
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "document_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "source_url_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_context_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "carrier_form_library",
+            "broker_program_page",
+            "mga_program_page",
+            "wholesale_broker_page",
+            "public_filing_record",
+            "forms_schedule",
+            "product_page",
+            "search_result",
+            "webpage_reference",
+            "unknown",
+            null
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "broker_or_mga": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wholesale_broker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "group_numbers": {
+          "$ref": "#/$defs/group_number_array"
+        },
+        "risk_class_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "source_context_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_found": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_verified": {
+          "type": "string",
+          "format": "date"
+        },
+        "checked_at_research": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "access_status": {
+          "$ref": "#/$defs/access_status"
+        },
+        "source_confidence": {
+          "$ref": "#/$defs/source_confidence"
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "webpage_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A public webpage accepted as source evidence when it lists exclusions, endorsements, limits, sublimits, program terms, risk classes, or policy language without a separate downloadable form.",
+      "required": [
+        "web_reference_id",
+        "reference_url",
+        "parent_page_url",
+        "reference_role",
+        "date_found",
+        "date_verified",
+        "access_status",
+        "rights_status",
+        "evidence_snippet",
+        "source_confidence",
+        "review_status"
+      ],
+      "properties": {
+        "web_reference_id": {
+          "type": "string",
+          "pattern": "^web_[A-Za-z0-9_\\-]+$"
+        },
+        "research_row_id": {
+          "$ref": "#/$defs/research_row_id"
+        },
+        "reference_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "source_url_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reference_role": {
+          "type": "string",
+          "enum": [
+            "policy_language_page",
+            "webpage_exclusion_list",
+            "webpage_endorsement_list",
+            "webpage_limits_or_sublimits_list",
+            "program_product_page",
+            "carrier_form_page",
+            "parent_source_context",
+            "risk_class_page",
+            "other",
+            "unknown"
+          ]
+        },
+        "page_title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_domain": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "linked_document_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "linked_document_numbers": {
+          "$ref": "#/$defs/document_number_array"
+        },
+        "linked_group_numbers": {
+          "$ref": "#/$defs/group_number_array"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type": {
+          "$ref": "#/$defs/business_type"
+        },
+        "business_subtype": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "underwriting_company": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "broker_or_mga": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "product_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contains_policy_language": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "contains_exclusions": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "contains_endorsements": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "contains_limits_or_sublimits": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "listed_exclusions_raw": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "listed_endorsements_raw": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "limits_or_sublimits_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "covered_professional_services": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "excluded_activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "page_snapshot_requested": {
+          "type": "boolean",
+          "default": true
+        },
+        "date_found": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_verified": {
+          "type": "string",
+          "format": "date"
+        },
+        "checked_at_research": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "source_last_modified_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "access_status": {
+          "$ref": "#/$defs/access_status"
+        },
+        "access_method": {
+          "$ref": "#/$defs/access_method"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "evidence_snippet": {
+          "type": "string"
+        },
+        "source_confidence": {
+          "$ref": "#/$defs/source_confidence"
+        },
+        "needs_manual_review": {
+          "type": "boolean",
+          "default": false
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "document_candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_id",
+        "document_number",
+        "canonical_title",
+        "line_of_business",
+        "policy_type",
+        "policy_subtype",
+        "profession_type",
+        "business_type",
+        "source_type",
+        "authority_tier",
+        "review_status",
+        "rights_status",
+        "policy_role",
+        "document_type",
+        "source_url",
+        "parent_page_url",
+        "access_status",
+        "date_found",
+        "date_verified",
+        "source_confidence",
+        "needs_manual_review"
+      ],
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "pattern": "^doc_[A-Za-z0-9_\\-]+$"
+        },
+        "document_number": {
+          "$ref": "#/$defs/document_number"
+        },
+        "canonical_document_number": {
+          "$ref": "#/$defs/canonical_document_number_nullable"
+        },
+        "research_row_id": {
+          "$ref": "#/$defs/research_row_id"
+        },
+        "group_numbers": {
+          "$ref": "#/$defs/group_number_array"
+        },
+        "primary_group_number": {
+          "$ref": "#/$defs/group_number_nullable"
+        },
+        "record_type": {
+          "$ref": "#/$defs/record_type"
+        },
+        "canonical_title": {
+          "type": "string"
+        },
+        "line_of_business": {
+          "$ref": "#/$defs/line_of_business"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type": {
+          "$ref": "#/$defs/business_type"
+        },
+        "business_subtype": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "class_label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "class_code_system": {
+          "$ref": "#/$defs/class_code_system"
+        },
+        "class_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "excluded_activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "covered_professional_services": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "jurisdiction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state_filing_state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "country": {
+          "type": "string",
+          "default": "US"
+        },
+        "source_type": {
+          "$ref": "#/$defs/source_type"
+        },
+        "authority_tier": {
+          "$ref": "#/$defs/authority_tier"
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "retrieval_status": {
+          "$ref": "#/$defs/retrieval_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "source_label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_url_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "canonical_pdf_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "canonical_html_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "alternate_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "default": []
+        },
+        "webpage_reference_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "source_occurrence_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "access_status": {
+          "$ref": "#/$defs/access_status"
+        },
+        "url_status": {
+          "$ref": "#/$defs/access_status"
+        },
+        "access_method": {
+          "$ref": "#/$defs/access_method"
+        },
+        "import_action": {
+          "$ref": "#/$defs/import_action"
+        },
+        "as_of_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_found": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_verified": {
+          "type": "string",
+          "format": "date"
+        },
+        "retrieved_at_research": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "source_last_modified_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "issuer_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "underwriting_company": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "naic_company_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "broker_or_mga": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wholesale_broker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "product_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "admitted_status": {
+          "$ref": "#/$defs/admitted_status"
+        },
+        "form_family_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "policy_package_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "risk_class_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "form_title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "edition_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "effective_from": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "effective_to": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "serff_tracking_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "filing_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "filing_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "filing_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "filing_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "policy_role": {
+          "$ref": "#/$defs/policy_role"
+        },
+        "document_type": {
+          "$ref": "#/$defs/document_type"
+        },
+        "claims_basis": {
+          "$ref": "#/$defs/claims_basis"
+        },
+        "state_specific": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "iso_or_advisory_reference": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "carrier_modified": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "base_form_title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_form_edition_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "replaces_form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "relationship_to_base_form": {
+          "$ref": "#/$defs/relationship_to_base_form"
+        },
+        "is_base_form": {
+          "$ref": "#/$defs/yes_no_unknown"
+        },
+        "is_endorsement": {
+          "$ref": "#/$defs/yes_no_unknown"
+        },
+        "is_exclusion_amendment": {
+          "$ref": "#/$defs/yes_no_unknown"
+        },
+        "is_forms_schedule": {
+          "$ref": "#/$defs/yes_no_unknown"
+        },
+        "contains_exclusions": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "key_exclusions_found": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "key_endorsements_found": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "trade_specific_modification_found": {
+          "$ref": "#/$defs/yes_no_unknown"
+        },
+        "modification_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limits_offered_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sublimits_offered_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "deductible_or_retention_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "defense_costs_inside_or_outside_limits": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "inside_limits",
+            "outside_limits",
+            "unknown",
+            null
+          ]
+        },
+        "claims_expense_erodes_limit": {
+          "$ref": "#/$defs/yes_no_unknown"
+        },
+        "erp_tail_terms_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retroactive_date_terms_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "optional_addons_raw": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "webpage_extractable": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "True when the document URL is an HTML page that should be snapshotted and parsed."
+        },
+        "webpage_policy_language_found": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "webpage_exclusions_listed": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "webpage_endorsements_listed": {
+          "$ref": "#/$defs/yes_partial_no_unknown"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_confidence": {
+          "$ref": "#/$defs/source_confidence"
+        },
+        "duplicate_variant_status": {
+          "$ref": "#/$defs/duplicate_variant_status"
+        },
+        "duplicate_variant_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parser_priority": {
+          "$ref": "#/$defs/parser_priority"
+        },
+        "preferred_filename": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "markdown_target_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "needs_manual_review": {
+          "type": "boolean"
+        },
+        "record_status": {
+          "$ref": "#/$defs/record_status"
+        },
+        "record_version": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "stable_fingerprint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "markdown_refs": {
+          "$ref": "#/$defs/id_array"
+        },
+        "researcher_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "group_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "group_id",
+        "group_number",
+        "group_type",
+        "group_label",
+        "review_status",
+        "record_status"
+      ],
+      "properties": {
+        "group_id": {
+          "type": "string",
+          "pattern": "^grp_[A-Za-z0-9_\\-]+$"
+        },
+        "group_number": {
+          "$ref": "#/$defs/group_number"
+        },
+        "canonical_group_number": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^G-[0-9]{8}$"
+        },
+        "group_type": {
+          "$ref": "#/$defs/group_type"
+        },
+        "group_label": {
+          "type": "string"
+        },
+        "line_of_business": {
+          "$ref": "#/$defs/line_of_business"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type": {
+          "$ref": "#/$defs/business_type"
+        },
+        "business_subtype": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "class_label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "class_code_system": {
+          "$ref": "#/$defs/class_code_system"
+        },
+        "class_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "excluded_activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "underwriting_company": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "broker_or_mga": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wholesale_broker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "product_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_form_title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_edition_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "member_document_numbers": {
+          "$ref": "#/$defs/document_number_array"
+        },
+        "member_document_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "parent_group_numbers": {
+          "$ref": "#/$defs/group_number_array"
+        },
+        "child_group_numbers": {
+          "$ref": "#/$defs/group_number_array"
+        },
+        "source_url_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "record_status": {
+          "$ref": "#/$defs/record_status"
+        },
+        "record_version": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "metadata_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "program_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "program_id",
+        "program_name",
+        "line_of_business",
+        "policy_type",
+        "policy_subtype",
+        "review_status",
+        "rights_status"
+      ],
+      "properties": {
+        "program_id": {
+          "type": "string",
+          "pattern": "^prog_[A-Za-z0-9_\\-]+$"
+        },
+        "program_name": {
+          "type": "string"
+        },
+        "product_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "group_number": {
+          "$ref": "#/$defs/group_number_nullable"
+        },
+        "line_of_business": {
+          "$ref": "#/$defs/line_of_business"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "underwriting_company": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "naic_company_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "broker_or_mga": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wholesale_broker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "admitted_status": {
+          "$ref": "#/$defs/admitted_status"
+        },
+        "jurisdiction_scope": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target_risk_class_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "source_url_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "webpage_reference_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "document_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "document_numbers": {
+          "$ref": "#/$defs/document_number_array"
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_verified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "risk_class": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "risk_class_id",
+        "line_of_business",
+        "policy_type",
+        "policy_subtype",
+        "profession_type",
+        "business_type",
+        "review_status",
+        "rights_status"
+      ],
+      "properties": {
+        "risk_class_id": {
+          "type": "string",
+          "pattern": "^risk_[A-Za-z0-9_\\-]+$"
+        },
+        "group_number": {
+          "$ref": "#/$defs/group_number_nullable"
+        },
+        "line_of_business": {
+          "$ref": "#/$defs/line_of_business"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type": {
+          "$ref": "#/$defs/business_type"
+        },
+        "business_subtype": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "class_label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "class_code_system": {
+          "$ref": "#/$defs/class_code_system"
+        },
+        "class_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "excluded_activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "covered_professional_services": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "source_url_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "webpage_reference_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_verified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "form_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "form_family_id",
+        "line_of_business",
+        "policy_type",
+        "policy_subtype",
+        "review_status",
+        "rights_status"
+      ],
+      "properties": {
+        "form_family_id": {
+          "type": "string",
+          "pattern": "^family_[A-Za-z0-9_\\-]+$"
+        },
+        "group_number": {
+          "$ref": "#/$defs/group_number_nullable"
+        },
+        "family_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line_of_business": {
+          "$ref": "#/$defs/line_of_business"
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "underwriting_company": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_policy_form_title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_policy_form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_policy_edition_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "claims_basis": {
+          "$ref": "#/$defs/claims_basis"
+        },
+        "risk_class_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "document_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "document_numbers": {
+          "$ref": "#/$defs/document_number_array"
+        },
+        "endorsement_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "exclusion_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "policy_package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_package_id",
+        "package_name",
+        "review_status",
+        "rights_status"
+      ],
+      "properties": {
+        "policy_package_id": {
+          "type": "string",
+          "pattern": "^pkg_[A-Za-z0-9_\\-]+$"
+        },
+        "group_number": {
+          "$ref": "#/$defs/group_number_nullable"
+        },
+        "package_name": {
+          "type": "string"
+        },
+        "program_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "form_family_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "broker_or_mga": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wholesale_broker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "risk_class_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "document_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "document_numbers": {
+          "$ref": "#/$defs/document_number_array"
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "webpage_reference_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_verified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "endorsement_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endorsement_id",
+        "endorsement_name",
+        "review_status",
+        "rights_status"
+      ],
+      "properties": {
+        "endorsement_id": {
+          "type": "string",
+          "pattern": "^end_[A-Za-z0-9_\\-]+$"
+        },
+        "endorsement_name": {
+          "type": "string"
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "form_family_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type": {
+          "$ref": "#/$defs/business_type"
+        },
+        "risk_class_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "edition_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modifies_document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modifies_document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "jurisdiction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "product_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "policy_role": {
+          "$ref": "#/$defs/policy_role_nullable"
+        },
+        "endorsement_category": {
+          "$ref": "#/$defs/endorsement_category"
+        },
+        "optional_or_mandatory": {
+          "$ref": "#/$defs/optional_or_mandatory"
+        },
+        "coverage_effect": {
+          "$ref": "#/$defs/coverage_effect"
+        },
+        "limit_or_sublimit_effect": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "pdf_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "web_reference_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_or_section_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "as_of_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_verified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "exclusion_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exclusion_id",
+        "exclusion_name",
+        "review_status",
+        "rights_status"
+      ],
+      "properties": {
+        "exclusion_id": {
+          "type": "string",
+          "pattern": "^exc_[A-Za-z0-9_\\-]+$"
+        },
+        "exclusion_name": {
+          "type": "string"
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "form_family_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "policy_type": {
+          "$ref": "#/$defs/policy_type"
+        },
+        "policy_subtype": {
+          "$ref": "#/$defs/policy_subtype"
+        },
+        "profession_type": {
+          "$ref": "#/$defs/profession_type"
+        },
+        "business_type": {
+          "$ref": "#/$defs/business_type"
+        },
+        "risk_class_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "edition_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_form_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modifies_document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modifies_document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "jurisdiction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "program_administrator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "product_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exclusion_category": {
+          "$ref": "#/$defs/exclusion_category"
+        },
+        "standalone_or_embedded": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "standalone",
+            "embedded",
+            "unknown",
+            null
+          ]
+        },
+        "exclusion_effect": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "absolute_exclusion",
+            "partial_exclusion",
+            "exclusion_with_carveback",
+            "sublimited_carveback",
+            "definition_based_exclusion",
+            "condition_based_exclusion",
+            "unknown",
+            null
+          ]
+        },
+        "coverage_effect": {
+          "$ref": "#/$defs/coverage_effect"
+        },
+        "applies_to": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "carveback_summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "pdf_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "web_reference_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_or_section_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "as_of_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_verified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "coverage_term": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coverage_term_id",
+        "term_type",
+        "applies_to_type",
+        "applies_to_id",
+        "review_status",
+        "rights_status"
+      ],
+      "properties": {
+        "coverage_term_id": {
+          "type": "string",
+          "pattern": "^term_[A-Za-z0-9_\\-]+$"
+        },
+        "term_type": {
+          "type": "string",
+          "enum": [
+            "limit",
+            "sublimit",
+            "aggregate_limit",
+            "per_claim_limit",
+            "deductible",
+            "retention",
+            "defense_costs",
+            "claims_expense_treatment",
+            "optional_coverage",
+            "coverage_extension",
+            "supplemental_payment",
+            "waiting_period",
+            "retroactive_date",
+            "extended_reporting_period",
+            "unknown"
+          ]
+        },
+        "coverage_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "applies_to_type": {
+          "type": "string",
+          "enum": [
+            "document",
+            "endorsement",
+            "exclusion",
+            "program",
+            "risk_class",
+            "form_family",
+            "policy_package",
+            "webpage_reference",
+            "unknown"
+          ]
+        },
+        "applies_to_id": {
+          "type": "string"
+        },
+        "applies_to_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "amount_min": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "amount_max": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "amount_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "currency": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "USD"
+        },
+        "basis": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "per_claim",
+            "per_wrongful_act",
+            "per_policy_period",
+            "aggregate",
+            "per_disciplinary_proceeding",
+            "per_subpoena",
+            "per_privacy_event",
+            "per_lockbox_claim",
+            "per_fair_housing_claim",
+            "unknown",
+            null
+          ]
+        },
+        "inside_or_outside_limits": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "inside_limits",
+            "outside_limits",
+            "unknown",
+            null
+          ]
+        },
+        "erodes_limit": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "deductible_applies": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "retention_applies": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "optional_or_included": {
+          "$ref": "#/$defs/optional_or_mandatory"
+        },
+        "activity_scope_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity_scope_tag"
+          },
+          "default": []
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "web_reference_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_or_section_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_verified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/review_status"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "download_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_id",
+        "source_url",
+        "retrieval_intent",
+        "expected_mime_type",
+        "requires_manual_terms_acceptance",
+        "rights_status",
+        "parse_requested",
+        "target_visibility"
+      ],
+      "properties": {
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^manifest_[A-Za-z0-9_\\-]+$"
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "document_number": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/document_number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "web_reference_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent_page_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "canonical_pdf_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "canonical_html_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "retrieval_intent": {
+          "type": "string",
+          "enum": [
+            "download_pdf",
+            "snapshot_html",
+            "manual_download",
+            "reference_only_skip_download"
+          ]
+        },
+        "expected_mime_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "text/html",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "unknown"
+          ]
+        },
+        "preferred_filename": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target_visibility": {
+          "$ref": "#/$defs/target_visibility"
+        },
+        "source_type": {
+          "$ref": "#/$defs/source_type"
+        },
+        "authority_tier": {
+          "$ref": "#/$defs/authority_tier"
+        },
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "access_method": {
+          "$ref": "#/$defs/access_method"
+        },
+        "rate_limit_group": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requires_manual_terms_acceptance": {
+          "type": "boolean"
+        },
+        "parse_requested": {
+          "type": "boolean"
+        },
+        "parser_profile": {
+          "$ref": "#/$defs/parser_profile"
+        },
+        "gcs_target_original": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata_sidecar_target": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "date_verified": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "parse_targets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "metadata_json": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "pages_json": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "clauses_json": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "chunks_json": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "markdown": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "parse_report_json": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source_links_json": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "webpage_snapshot_html": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationship_id",
+        "relationship_type",
+        "from_id",
+        "to_id"
+      ],
+      "properties": {
+        "relationship_id": {
+          "type": "string",
+          "pattern": "^rel_[A-Za-z0-9_\\-]+$"
+        },
+        "relationship_type": {
+          "type": "string",
+          "enum": [
+            "duplicate_of",
+            "alternate_url_for",
+            "source_page_for",
+            "same_form_family",
+            "base_form_for",
+            "variant_of",
+            "profession_specific_variant_of",
+            "business_class_variant_of",
+            "program_variant_of",
+            "state_variant_of",
+            "endorsement_to_policy",
+            "endorsement_modifies_policy",
+            "exclusion_to_policy",
+            "exclusion_modifies_policy",
+            "coverage_term_for",
+            "risk_class_uses_form",
+            "program_offers_form",
+            "program_offers_risk_class",
+            "policy_package_contains_document",
+            "forms_schedule_lists_document",
+            "webpage_reference_for_document",
+            "webpage_reference_lists_exclusion",
+            "webpage_reference_lists_endorsement",
+            "webpage_reference_lists_limit",
+            "document_member_of_group",
+            "group_contains_document",
+            "SERFF_record_for",
+            "replaces",
+            "replaced_by"
+          ]
+        },
+        "from_id": {
+          "type": "string"
+        },
+        "to_id": {
+          "type": "string"
+        },
+        "from_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "to_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "from_record_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "document",
+            "group",
+            "source_url",
+            "webpage_reference",
+            "endorsement",
+            "exclusion",
+            "coverage_term",
+            "program",
+            "risk_class",
+            "form_family",
+            "policy_package",
+            "unknown",
+            null
+          ]
+        },
+        "to_record_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "document",
+            "group",
+            "source_url",
+            "webpage_reference",
+            "endorsement",
+            "exclusion",
+            "coverage_term",
+            "program",
+            "risk_class",
+            "form_family",
+            "policy_package",
+            "unknown",
+            null
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.75
+        },
+        "evidence_snippet": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_found": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "change_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "change_id",
+        "changed_at",
+        "change_type",
+        "affected_numbers",
+        "summary"
+      ],
+      "properties": {
+        "change_id": {
+          "type": "string",
+          "pattern": "^chg_[A-Za-z0-9_\\-]+$"
+        },
+        "changed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "changed_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "research_import"
+        },
+        "change_type": {
+          "type": "string",
+          "enum": [
+            "created",
+            "metadata_corrected",
+            "source_url_added",
+            "source_url_removed",
+            "webpage_reference_added",
+            "document_reclassified",
+            "group_created",
+            "group_membership_added",
+            "group_membership_removed",
+            "relationship_added",
+            "relationship_removed",
+            "duplicate_marked",
+            "duplicate_unmarked",
+            "merged",
+            "split",
+            "superseded",
+            "retired",
+            "markdown_regenerated",
+            "manual_review_update",
+            "schema_migration"
+          ]
+        },
+        "affected_numbers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "affected_ids": {
+          "$ref": "#/$defs/id_array"
+        },
+        "old_value_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "new_value_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "markdown_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "markdown_id",
+        "record_number",
+        "record_type",
+        "file_path",
+        "generated_at",
+        "source_metadata_sha256"
+      ],
+      "properties": {
+        "markdown_id": {
+          "type": "string",
+          "pattern": "^md_[A-Za-z0-9_\\-]+$"
+        },
+        "record_number": {
+          "type": "string"
+        },
+        "record_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "record_type": {
+          "type": "string",
+          "enum": [
+            "document",
+            "group",
+            "program",
+            "risk_class",
+            "form_family",
+            "policy_package",
+            "endorsement",
+            "exclusion",
+            "coverage_term",
+            "webpage_reference",
+            "index"
+          ]
+        },
+        "file_path": {
+          "type": "string"
+        },
+        "markdown_anchor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_synced_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "source_bundle_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_metadata_sha256": {
+          "type": "string"
+        },
+        "markdown_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "needs_regeneration": {
+          "type": "boolean",
+          "default": false
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
     }
   }
 }

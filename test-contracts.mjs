@@ -152,68 +152,20 @@ assert.equal(
   "evidence-packet candidate vector_dim must not exceed 2048 (Firestore limit)"
 );
 
-// --- Command Center research-import bundle (policygpt.research_import_bundle.v1) ---
+// --- Command Center research-import bundle (policygpt.research_import_bundle.v2) ---
 const researchImportSchema = readJson("research-import-bundle.schema.json");
 const validateResearchImport = ajv.compile(researchImportSchema);
 
-const researchImportBundle = {
-  schema_version: "policygpt.research_import_bundle.v1",
-  research_run: {
-    research_job_id: "research_re_eo_ca_001",
-    topic: "Real estate agent E&O policy forms, exclusions, endorsements (CA)",
-    line_of_business: "professional_liability",
-    profession: "real_estate_agent",
-    generated_at: "2026-06-26T00:00:00Z",
-    as_of_date: "2026-06-26",
-    default_review_status: "unreviewed",
-    target_corpus_id: "public_professional_liability_real_estate_agent"
-  },
-  source_urls: [{
-    url_id: "url_abc",
-    url: "https://example.com/re-eo-policy.pdf",
-    normalized_url: "https://example.com/re-eo-policy.pdf",
-    url_status: "direct_pdf_verified",
-    result_category: "policy_form_pdf",
-    first_seen_at: "2026-06-26T00:00:00Z",
-    checked_at_research: "2026-06-26T00:00:00Z",
-    should_check_for_updates: true,
-    content_type_guess: "pdf",
-    access_method: "direct_http",
-    rights_status: "carrier_public_marketing"
-  }],
-  documents: [{
-    document_id: "doc_abc",
-    canonical_title: "Example RE Agents E&O Policy",
-    line_of_business: "professional_liability",
-    profession: "real_estate_agent",
-    source_type: "carrier_public",
-    authority_tier: "carrier_form",
-    review_status: "unreviewed",
-    rights_status: "carrier_public_marketing",
-    policy_role: "base_policy_form",
-    document_type: "pdf_policy_form",
-    source_url: "https://example.com/re-eo-policy.pdf",
-    url_status: "direct_pdf_verified",
-    needs_manual_review: true
-  }],
-  download_manifest: [{
-    manifest_id: "manifest_abc",
-    document_id: "doc_abc",
-    source_url: "https://example.com/re-eo-policy.pdf",
-    retrieval_intent: "download_pdf",
-    expected_mime_type: "application/pdf",
-    requires_manual_terms_acceptance: false,
-    rights_status: "carrier_public_marketing",
-    parse_requested: true,
-    target_visibility: "public"
-  }]
-};
+const researchImportBundle = readJson("research-import-bundle.example.json");
 assert.equal(validateResearchImport(researchImportBundle), true, JSON.stringify(validateResearchImport.errors, null, 2));
 
-// schema_version is frozen; review_status must default unreviewed; retrieval disabled.
-assert.equal(validateResearchImport({ ...researchImportBundle, schema_version: "policygpt.research_import_bundle.v2" }), false, "research-import schema_version is frozen to v1");
-const reviewedDoc = JSON.parse(JSON.stringify(researchImportBundle));
-reviewedDoc.documents[0].review_status = "reviewed";
-assert.equal(validateResearchImport(reviewedDoc), false, "research-import documents must be unreviewed (nothing pre-approved)");
+// schema_version is frozen to v2: the prior v1 string must now be rejected.
+assert.equal(validateResearchImport({ ...researchImportBundle, schema_version: "policygpt.research_import_bundle.v1" }), false, "research-import schema_version is frozen to v2");
+// review_status is enum-constrained (unreviewed|manual_review|reviewed|rejected, default unreviewed);
+// arbitrary/pre-approved states are rejected by the schema. The "must import unreviewed" rule is
+// additionally enforced server-side by the Coordinator importer (see coordinator self-tests).
+const badStatusDoc = JSON.parse(JSON.stringify(researchImportBundle));
+badStatusDoc.documents[0].review_status = "approved";
+assert.equal(validateResearchImport(badStatusDoc), false, "research-import review_status must be one of the allowed enum values");
 
 console.log("PolicyGPT contract smoke tests passed.");
