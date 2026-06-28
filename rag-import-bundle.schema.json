@@ -104,6 +104,16 @@
           },
           "public_retrieval_default": {
             "type": "boolean"
+          },
+          "freshness_mode": {
+            "type": "string",
+            "enum": ["time_decay", "evergreen", "manual"],
+            "description": "Default freshness mode for sources in this bucket. evergreen = age irrelevant (definitions/endorsement types), excluded from scoring + never expires."
+          },
+          "freshness_horizon_months": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "For time_decay buckets: months until a source's freshness reaches 0 and it expires (default 24)."
           }
         },
         "additionalProperties": false
@@ -188,6 +198,17 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 5
+          },
+          "freshness_mode": {
+            "type": "string",
+            "enum": ["time_decay", "evergreen", "manual"],
+            "description": "Per-source override of the bucket's freshness mode. evergreen = excluded from scoring + never expires."
+          },
+          "freshness_seed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Operator-set freshness score 0-5, used only when freshness_mode = manual."
           },
           "freshness": {
             "type": "object",
