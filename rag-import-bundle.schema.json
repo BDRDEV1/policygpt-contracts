@@ -6,7 +6,8 @@
   "required": [
     "schema_version",
     "bundle_metadata",
-    "source_records"
+    "source_records",
+    "import_policy"
   ],
   "properties": {
     "schema_version": {
@@ -356,16 +357,12 @@
             "properties": {
               "review_status": {
                 "type": "string",
-                "enum": [
-                  "unreviewed",
-                  "in_review",
-                  "approved",
-                  "rejected",
-                  "needs_update"
-                ]
+                "const": "unreviewed",
+                "description": "External import bundles must import unreviewed."
               },
               "public_answer_allowed": {
-                "type": "boolean"
+                "type": "boolean",
+                "const": false
               },
               "review_priority": {
                 "type": "string",
@@ -392,23 +389,15 @@
             "properties": {
               "retrieval_status": {
                 "type": "string",
-                "enum": [
-                  "disabled",
-                  "internal_only",
-                  "public_enabled"
-                ]
+                "const": "disabled"
               },
               "promotion_status": {
                 "type": "string",
-                "enum": [
-                  "not_promoted",
-                  "candidate",
-                  "promoted",
-                  "demoted"
-                ]
+                "const": "not_promoted"
               },
               "customer_visible_citations_allowed": {
-                "type": "boolean"
+                "type": "boolean",
+                "const": false
               },
               "blocked_intents": {
                 "type": "array",
@@ -510,10 +499,12 @@
       "type": "object",
       "properties": {
         "reject_if_public_retrieval_enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "const": true
         },
         "reject_if_review_status_approved_from_external_bundle": {
-          "type": "boolean"
+          "type": "boolean",
+          "const": true
         },
         "dedupe_strategy": {
           "type": "string",
@@ -528,7 +519,11 @@
           "type": "boolean"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "reject_if_public_retrieval_enabled",
+        "reject_if_review_status_approved_from_external_bundle"
+      ]
     }
   },
   "additionalProperties": false

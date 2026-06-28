@@ -195,4 +195,23 @@ for (const banned of ["retrieval_status", "review_status", "promotion_status", "
   assert.equal(candidateProps.includes(banned), false, `deep-research candidate must not include ${banned} (cannot self-approve)`);
 }
 
+// --- Hardened structural invariants must REJECT unsafe shapes (per contract design review) ---
+const vRouter = ajv.getSchema("https://policygpt.com/contracts/intent-router-result.schema.json");
+assert.equal(vRouter({ ...readJson("intent-router-result.example.json"), route_class: "claims_question", is_blocked: false }), false, "claims route must be blocked");
+assert.equal(vRouter({ ...readJson("intent-router-result.example.json"), route_class: "quote_start", requires_registry_check: false }), false, "quote route must require registry check");
+
+const vRegistry = ajv.getSchema("https://policygpt.com/contracts/product-flow-registry.schema.json");
+const liveNoStates = JSON.parse(JSON.stringify(readJson("product-flow-registry.example.json")));
+liveNoStates.products[0].supported_states = [];
+assert.equal(vRegistry(liveNoStates), false, "live_quote_flow requires >=1 supported_state (licensing gate)");
+
+const vImport = ajv.getSchema("https://policygpt.com/schemas/policygpt.rag_import_bundle.v3.schema.json");
+const importPublic = JSON.parse(JSON.stringify(readJson("rag-import-bundle.example.json")));
+importPublic.source_records[0].retrieval_policy.retrieval_status = "public_enabled";
+assert.equal(vImport(importPublic), false, "import bundle cannot self-enable public retrieval");
+
+const vAnswer = ajv.getSchema("https://policygpt.com/contracts/rag-evidence-answer.schema.json");
+assert.equal(vAnswer({ ...readJson("rag-evidence-answer.example.json"), lane: "lane_d_safety_block", evidence_strength: "High" }), false, "safety-block lane must be Blocked strength");
+assert.equal(vAnswer({ ...readJson("rag-evidence-answer.example.json"), retrieval_mode: "controlled_web_search", evidence_strength: "High" }), false, "web search cannot be High evidence");
+
 console.log("PolicyGPT contract smoke tests passed.");

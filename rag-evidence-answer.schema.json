@@ -5,63 +5,253 @@
   "description": "The routed insurance answer returned to the plugin. Grounded in verified, reviewed source links selected by bucket/tag. Shows an internal-derived evidence STRENGTH (never a numeric confidence), source-link citations, and a disclaimer. Claims/coverage-determination/legal/unsupported are returned blocked with a safe explanation.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "lane", "evidence_strength", "answer", "disclaimer"],
+  "required": [
+    "schema_version",
+    "lane",
+    "evidence_strength",
+    "answer",
+    "disclaimer"
+  ],
   "properties": {
-    "schema_version": { "const": "policygpt.rag_evidence_answer.v2" },
+    "schema_version": {
+      "const": "policygpt.rag_evidence_answer.v2"
+    },
     "lane": {
       "type": "string",
-      "enum": ["lane_a_education", "lane_b_quote_intake", "lane_c_quote_result", "lane_d_claims_block", "lane_unsupported"]
+      "enum": [
+        "lane_a_education",
+        "lane_b_quote_intake",
+        "lane_c_quote_result",
+        "lane_d_safety_block",
+        "lane_unsupported"
+      ]
     },
-    "answer": { "type": "string", "description": "The answer text, or the safe block explanation when blocked." },
-    "blocked": { "type": "boolean", "default": false },
+    "answer": {
+      "type": "string",
+      "description": "The answer text, or the safe block explanation when blocked."
+    },
+    "blocked": {
+      "type": "boolean",
+      "default": false
+    },
     "block_reason": {
-      "type": ["string", "null"],
-      "enum": ["claims_question", "coverage_determination", "legal_advice", "unsupported_product_selling", "retrieval_disabled", null]
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "claims_question",
+        "coverage_determination",
+        "legal_advice",
+        "unsupported_product_selling",
+        "retrieval_disabled",
+        null
+      ]
     },
     "evidence_strength": {
       "type": "string",
       "description": "Customer-facing evidence label derived from the internal score + hard risk gates. Never expose a numeric confidence.",
-      "enum": ["High", "Medium", "Low", "Blocked"]
+      "enum": [
+        "High",
+        "Medium",
+        "Low",
+        "Blocked"
+      ]
     },
-    "buckets_used": { "type": "array", "items": { "type": "string" } },
+    "buckets_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "citations": {
       "type": "array",
       "description": "Verified source-link citations actually used to ground the answer (reviewed + retrieval-enabled only).",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["source_id", "title", "url"],
+        "required": [
+          "source_id",
+          "title",
+          "url"
+        ],
         "properties": {
-          "source_id": { "type": "string" },
-          "title": { "type": "string" },
-          "url": { "type": "string", "format": "uri" },
-          "publisher": { "type": ["string", "null"] },
-          "source_type": { "type": ["string", "null"] },
-          "authority_score": { "type": ["integer", "null"], "minimum": 0, "maximum": 5 },
-          "captured_at": { "type": ["string", "null"], "format": "date-time" },
-          "jurisdiction_states": { "type": "array", "items": { "type": "string" } }
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "publisher": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "authority_score": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 5
+          },
+          "captured_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "jurisdiction_states": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     },
     "retrieval_mode": {
       "type": "string",
       "description": "Where the grounding came from. Web search is the weakest tier (forced Low + logged for review).",
-      "enum": ["reviewed_source_graph", "approved_url_context", "controlled_web_search", "none"]
+      "enum": [
+        "reviewed_source_graph",
+        "approved_url_context",
+        "controlled_web_search",
+        "none"
+      ]
     },
-    "web_search_used": { "type": "boolean", "default": false },
+    "web_search_used": {
+      "type": "boolean",
+      "default": false
+    },
     "disclaimer_level": {
       "type": "string",
-      "enum": ["general_insurance_education", "coverage_education", "claims_block", "none"]
+      "enum": [
+        "general_insurance_education",
+        "coverage_education",
+        "claims_block",
+        "none"
+      ]
     },
-    "disclaimer": { "type": "string", "minLength": 1 },
-    "byline": { "type": ["string", "null"] },
-    "model_route": { "type": ["string", "null"], "description": "The answer model (e.g. claude-sonnet-4-6)." },
-    "evidence_packet_id": { "type": ["string", "null"], "description": "Reference to the stored internal evidence packet (scores, sources) for audit." }
+    "disclaimer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "byline": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "model_route": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The answer model (e.g. claude-sonnet-4-6)."
+    },
+    "evidence_packet_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Reference to the stored internal evidence packet (scores, sources) for audit."
+    }
   },
   "allOf": [
     {
-      "if": { "properties": { "blocked": { "const": true } } },
-      "then": { "properties": { "evidence_strength": { "const": "Blocked" } } }
+      "if": {
+        "properties": {
+          "blocked": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence_strength": {
+            "const": "Blocked"
+          },
+          "retrieval_mode": {
+            "const": "none"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lane": {
+            "const": "lane_d_safety_block"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "blocked"
+        ],
+        "properties": {
+          "blocked": {
+            "const": true
+          },
+          "evidence_strength": {
+            "const": "Blocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "block_reason"
+        ],
+        "properties": {
+          "block_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "blocked"
+        ],
+        "properties": {
+          "blocked": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retrieval_mode": {
+            "const": "controlled_web_search"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence_strength": {
+            "enum": [
+              "Low",
+              "Blocked"
+            ]
+          }
+        }
+      }
     }
   ]
 }
