@@ -5,9 +5,17 @@
   "description": "Output of the cheap intent router. Classifies the user message + entry context into a route class and conversation lane, and carries the gating signals (claims block, registry check) the lane selector enforces. The router classifies; it may NOT itself launch unsupported products or unblock claims content.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "route_class", "conversation_lane", "is_blocked"],
+  "required": [
+    "schema_version",
+    "route_class",
+    "conversation_lane",
+    "is_blocked",
+    "requires_registry_check"
+  ],
   "properties": {
-    "schema_version": { "const": "policygpt.intent_router_result.v1" },
+    "schema_version": {
+      "const": "policygpt.intent_router_result.v1"
+    },
     "route_class": {
       "type": "string",
       "description": "Primary intent classification.",
@@ -33,51 +41,211 @@
         "lane_a_education",
         "lane_b_quote_intake",
         "lane_c_quote_result",
-        "lane_d_claims_block",
+        "lane_d_safety_block",
         "lane_smalltalk",
         "lane_unsupported"
       ]
     },
-    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
     "is_blocked": {
       "type": "boolean",
       "description": "True when the message must NOT be answered as insurance content (claims, coverage determination, legal, or unsupported selling). The answer layer enforces this independently as a second gate."
     },
     "block_reason": {
-      "type": ["string", "null"],
-      "enum": ["claims_question", "coverage_determination", "legal_advice", "unsupported_product_selling", "retrieval_disabled", null]
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "claims_question",
+        "coverage_determination",
+        "legal_advice",
+        "unsupported_product_selling",
+        "retrieval_disabled",
+        null
+      ]
     },
     "deterministic_trigger": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Set when a deterministic rule (keyword/SEO-CTA payload) forced this classification, independent of the model. Hard rules win over the model."
     },
     "requires_registry_check": {
       "type": "boolean",
       "description": "True for quote_start/continue: the Product/Flow Registry must confirm the product+state is a live_quote_flow before any quote flow launches."
     },
-    "product_key": { "type": ["string", "null"] },
-    "line_of_business": { "type": ["string", "null"] },
-    "profession": { "type": ["string", "null"] },
-    "state": { "type": ["string", "null"] },
+    "product_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "line_of_business": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "profession": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "state": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "needed_buckets": {
       "type": "array",
       "description": "For education lanes: which source buckets the retrieval router should pull from.",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "needed_tags": {
       "type": "object",
       "description": "Tag filters (state/line/sub-type/topic) the retrieval router applies within the buckets.",
       "properties": {
-        "line_of_business_tags": { "type": "array", "items": { "type": "string" } },
-        "coverage_topic_tags": { "type": "array", "items": { "type": "string" } },
-        "profession_tags": { "type": "array", "items": { "type": "string" } },
-        "state_tags": { "type": "array", "items": { "type": "string" } }
+        "line_of_business_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "coverage_topic_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profession_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "state_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "disclaimer_level": {
       "type": "string",
-      "enum": ["general_insurance_education", "coverage_education", "claims_block", "none"]
+      "enum": [
+        "general_insurance_education",
+        "coverage_education",
+        "claims_block",
+        "none"
+      ]
     },
-    "model_route": { "type": ["string", "null"], "description": "Which router model produced this (e.g. the cheap classifier)." }
-  }
+    "model_route": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Which router model produced this (e.g. the cheap classifier)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "route_class"
+        ],
+        "properties": {
+          "route_class": {
+            "enum": [
+              "quote_start",
+              "quote_continue"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "requires_registry_check"
+        ],
+        "properties": {
+          "requires_registry_check": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "route_class"
+        ],
+        "properties": {
+          "route_class": {
+            "enum": [
+              "claims_question",
+              "coverage_determination_question",
+              "legal_question"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "is_blocked",
+          "conversation_lane",
+          "block_reason"
+        ],
+        "properties": {
+          "is_blocked": {
+            "const": true
+          },
+          "conversation_lane": {
+            "const": "lane_d_safety_block"
+          },
+          "block_reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "route_class"
+        ],
+        "properties": {
+          "route_class": {
+            "enum": [
+              "insurance_education_question",
+              "coverage_education_question"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "conversation_lane",
+          "is_blocked"
+        ],
+        "properties": {
+          "conversation_lane": {
+            "const": "lane_a_education"
+          },
+          "is_blocked": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
 }
