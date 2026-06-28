@@ -140,6 +140,11 @@
             "type": "string",
             "format": "uri"
           },
+          "source_page_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "For document/PDF sources: the webpage where the document is posted (its landing page), separate from the direct file URL. Used by the updater to re-verify the document is still live. Collected by Deep Research for document candidates; the coordinator requires it for PDF/document sources at fetch time."
+          },
           "publisher": {
             "type": "string"
           },
