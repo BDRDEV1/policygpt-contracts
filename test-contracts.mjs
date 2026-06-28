@@ -214,4 +214,13 @@ const vAnswer = ajv.getSchema("https://policygpt.com/contracts/rag-evidence-answ
 assert.equal(vAnswer({ ...readJson("rag-evidence-answer.example.json"), lane: "lane_d_safety_block", evidence_strength: "High" }), false, "safety-block lane must be Blocked strength");
 assert.equal(vAnswer({ ...readJson("rag-evidence-answer.example.json"), retrieval_mode: "controlled_web_search", evidence_strength: "High" }), false, "web search cannot be High evidence");
 
+// --- Source taxonomy reference: restricted buckets must be flagged + present ---
+const taxonomy = readJson("taxonomy.reference.json");
+assert.equal(taxonomy.schema_version, "policygpt.source_taxonomy.v1", "taxonomy schema_version");
+for (const restricted of ["claims_case_studies", "legal_precedent"]) {
+  assert.ok(taxonomy.bucket_families.includes(restricted), `${restricted} is a known bucket family`);
+  assert.ok(taxonomy.restricted_buckets_public_answer_disabled_at_launch.includes(restricted), `${restricted} is restricted for public answers at launch`);
+}
+assert.ok(Array.isArray(taxonomy.tags.safety_tags) && taxonomy.tags.safety_tags.includes("claims_block_required"), "taxonomy carries safety tags");
+
 console.log("PolicyGPT contract smoke tests passed.");
