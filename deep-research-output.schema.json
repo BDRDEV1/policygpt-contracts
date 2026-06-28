@@ -33,7 +33,9 @@
           "display_name": { "type": "string" },
           "bucket_family": { "type": "string" },
           "description": { "type": "string" },
-          "risk_level": { "type": "string", "enum": ["low", "medium", "high", "restricted"] }
+          "risk_level": { "type": "string", "enum": ["low", "medium", "high", "restricted"] },
+          "freshness_mode": { "type": "string", "enum": ["time_decay", "evergreen", "manual"] },
+          "freshness_horizon_months": { "type": "integer", "minimum": 1 }
         }
       }
     },
@@ -60,6 +62,8 @@
             "enum": ["primary_regulator", "state_regulator", "federal_agency", "regulator_glossary", "industry_reference", "academic_research", "actuarial_research", "consumer_education", "carrier_document", "trade_association", "agency_internal", "case_law", "claim_case_study", "low_authority_background"]
           },
           "authority_score_seed": { "type": "integer", "minimum": 0, "maximum": 5 },
+          "freshness_mode": { "type": "string", "enum": ["time_decay", "evergreen", "manual"] },
+          "freshness_seed": { "type": "integer", "minimum": 0, "maximum": 5 },
           "jurisdiction": {
             "type": "object",
             "additionalProperties": false,

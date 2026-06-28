@@ -18,7 +18,9 @@
       "bucket_family": "foundation",
       "description": "Insurance definitions, basic terms, and general terminology.",
       "risk_level": "low",
-      "public_retrieval_default": false
+      "public_retrieval_default": false,
+      "freshness_mode": "time_decay",
+      "freshness_horizon_months": 24
     },
     {
       "bucket_key": "national_regulator",
@@ -26,7 +28,8 @@
       "bucket_family": "authority",
       "description": "National regulator or regulator association sources.",
       "risk_level": "low",
-      "public_retrieval_default": false
+      "public_retrieval_default": false,
+      "freshness_mode": "evergreen"
     },
     {
       "bucket_key": "state_regulator",
@@ -133,7 +136,9 @@
           "coverage_education"
         ]
       },
-      "source_version": 1
+      "source_version": 1,
+      "freshness_mode": "time_decay",
+      "source_page_url": "https://www.example-doi.gov/bulletins/2026"
     },
     {
       "source_id": "src_naic_glossary",
