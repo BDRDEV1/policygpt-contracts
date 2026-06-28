@@ -49,6 +49,7 @@
           "title": { "type": "string", "minLength": 1 },
           "url": { "type": "string", "format": "uri" },
           "canonical_url": { "type": ["string", "null"], "format": "uri" },
+          "source_page_url": { "type": ["string", "null"], "format": "uri", "description": "For PDF/document candidates: the webpage where the document is posted (landing page), separate from the direct file URL, so the source can be re-verified. Deep Research should populate this for non-HTML document sources." },
           "publisher": { "type": "string", "minLength": 1 },
           "publisher_type": {
             "type": "string",
