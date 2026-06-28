@@ -1,0 +1,535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/schemas/policygpt.rag_import_bundle.v3.schema.json",
+  "title": "PolicyGPT RAG Import Bundle v3",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "bundle_metadata",
+    "source_records"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "policygpt.rag_import_bundle.v3.0"
+    },
+    "bundle_metadata": {
+      "type": "object",
+      "required": [
+        "bundle_id",
+        "created_at",
+        "created_by",
+        "purpose",
+        "default_review_status",
+        "default_retrieval_status"
+      ],
+      "properties": {
+        "bundle_id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "source_method": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "deep_research",
+            "csv_import",
+            "url_list",
+            "command_center",
+            "mixed"
+          ]
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "default_review_status": {
+          "type": "string",
+          "enum": [
+            "unreviewed"
+          ]
+        },
+        "default_retrieval_status": {
+          "type": "string",
+          "enum": [
+            "disabled"
+          ]
+        },
+        "default_public_answer_allowed": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "bucket_definitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "bucket_key",
+          "display_name",
+          "bucket_family",
+          "risk_level"
+        ],
+        "properties": {
+          "bucket_key": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "bucket_family": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "restricted"
+            ]
+          },
+          "public_retrieval_default": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "source_records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "title",
+          "url",
+          "publisher",
+          "source_type",
+          "buckets",
+          "tags",
+          "review",
+          "retrieval_policy"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "canonical_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "publisher_type": {
+            "type": "string",
+            "enum": [
+              "state_regulator",
+              "federal_agency",
+              "regulator_association",
+              "industry_reference",
+              "academic",
+              "actuarial",
+              "consumer_education",
+              "carrier",
+              "trade_association",
+              "agency_internal",
+              "case_law",
+              "other"
+            ]
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "primary_regulator",
+              "state_regulator",
+              "federal_agency",
+              "regulator_glossary",
+              "industry_reference",
+              "academic_research",
+              "actuarial_research",
+              "consumer_education",
+              "carrier_document",
+              "trade_association",
+              "agency_internal",
+              "case_law",
+              "claim_case_study",
+              "low_authority_background"
+            ]
+          },
+          "authority_score_seed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "freshness": {
+            "type": "object",
+            "properties": {
+              "published_date": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "last_updated_date": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "captured_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "recheck_after": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "content_hash": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Hash of the captured markdown; the updater uses this to detect material change."
+              }
+            },
+            "additionalProperties": false
+          },
+          "jurisdiction": {
+            "type": "object",
+            "properties": {
+              "country": {
+                "type": "string"
+              },
+              "states": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "jurisdiction_scope": {
+                "type": "string",
+                "enum": [
+                  "national",
+                  "state",
+                  "multi_state",
+                  "carrier_specific",
+                  "general",
+                  "unknown"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "object",
+            "properties": {
+              "intent_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "insurance_family_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "line_of_business_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "profession_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "coverage_topic_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "safety_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "key_details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "detail",
+                "use_case"
+              ],
+              "properties": {
+                "detail": {
+                  "type": "string"
+                },
+                "use_case": {
+                  "type": "string"
+                },
+                "risk_note": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "artifact_policy": {
+            "type": "object",
+            "properties": {
+              "fetch_method": {
+                "type": "string",
+                "enum": [
+                  "url_context",
+                  "playwright",
+                  "http_fetch",
+                  "pdf_fetch",
+                  "manual",
+                  "do_not_fetch_yet"
+                ]
+              },
+              "create_markdown": {
+                "type": "boolean"
+              },
+              "store_original_artifact": {
+                "type": "boolean"
+              },
+              "requires_manual_review_before_chunking": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "review": {
+            "type": "object",
+            "required": [
+              "review_status",
+              "public_answer_allowed",
+              "review_priority"
+            ],
+            "properties": {
+              "review_status": {
+                "type": "string",
+                "enum": [
+                  "unreviewed",
+                  "in_review",
+                  "approved",
+                  "rejected",
+                  "needs_update"
+                ]
+              },
+              "public_answer_allowed": {
+                "type": "boolean"
+              },
+              "review_priority": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "normal",
+                  "high",
+                  "urgent"
+                ]
+              },
+              "reviewer_notes": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "retrieval_policy": {
+            "type": "object",
+            "required": [
+              "retrieval_status",
+              "promotion_status",
+              "customer_visible_citations_allowed"
+            ],
+            "properties": {
+              "retrieval_status": {
+                "type": "string",
+                "enum": [
+                  "disabled",
+                  "internal_only",
+                  "public_enabled"
+                ]
+              },
+              "promotion_status": {
+                "type": "string",
+                "enum": [
+                  "not_promoted",
+                  "candidate",
+                  "promoted",
+                  "demoted"
+                ]
+              },
+              "customer_visible_citations_allowed": {
+                "type": "boolean"
+              },
+              "blocked_intents": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "allowed_intents": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "description": "Increments on each materially-changed re-capture; updates version rather than overwrite."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "source_relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from_source_id",
+          "to_source_id",
+          "relationship_type"
+        ],
+        "properties": {
+          "from_source_id": {
+            "type": "string"
+          },
+          "to_source_id": {
+            "type": "string"
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": [
+              "corroborates",
+              "defines",
+              "updates",
+              "conflicts_with",
+              "state_specific_version_of",
+              "carrier_specific_version_of",
+              "background_for"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "product_flow_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "product_key",
+          "source_ids",
+          "use_case"
+        ],
+        "properties": {
+          "product_key": {
+            "type": "string"
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "use_case": {
+            "type": "string",
+            "enum": [
+              "quote_flow_support",
+              "coverage_education",
+              "seo_support",
+              "underwriting_explanation",
+              "quote_result_explanation"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "import_policy": {
+      "type": "object",
+      "properties": {
+        "reject_if_public_retrieval_enabled": {
+          "type": "boolean"
+        },
+        "reject_if_review_status_approved_from_external_bundle": {
+          "type": "boolean"
+        },
+        "dedupe_strategy": {
+          "type": "string",
+          "enum": [
+            "canonical_url",
+            "source_id",
+            "content_hash",
+            "manual"
+          ]
+        },
+        "allow_update_existing_sources": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

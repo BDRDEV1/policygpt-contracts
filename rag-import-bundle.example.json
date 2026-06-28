@@ -1,0 +1,513 @@
+{
+  "schema_version": "policygpt.rag_import_bundle.v3.0",
+  "bundle_metadata": {
+    "bundle_id": "insurance_authority_sources_seed_001",
+    "created_at": "2026-06-28T12:00:00Z",
+    "created_by": "PolicyGPT Architecture Planning",
+    "source_method": "manual",
+    "purpose": "Seed reviewed-source graph with authoritative insurance education and regulator sources.",
+    "notes": "All records are imported as unreviewed and retrieval-disabled until Command Center human approval.",
+    "default_review_status": "unreviewed",
+    "default_retrieval_status": "disabled",
+    "default_public_answer_allowed": false
+  },
+  "bucket_definitions": [
+    {
+      "bucket_key": "definitions_and_glossary",
+      "display_name": "Definitions and Glossary",
+      "bucket_family": "foundation",
+      "description": "Insurance definitions, basic terms, and general terminology.",
+      "risk_level": "low",
+      "public_retrieval_default": false
+    },
+    {
+      "bucket_key": "national_regulator",
+      "display_name": "National Regulator / Regulator Association",
+      "bucket_family": "authority",
+      "description": "National regulator or regulator association sources.",
+      "risk_level": "low",
+      "public_retrieval_default": false
+    },
+    {
+      "bucket_key": "state_regulator",
+      "display_name": "State Insurance Regulators",
+      "bucket_family": "jurisdiction",
+      "description": "Official state DOI or equivalent regulator sources.",
+      "risk_level": "medium",
+      "public_retrieval_default": false
+    },
+    {
+      "bucket_key": "professional_liability",
+      "display_name": "Professional Liability",
+      "bucket_family": "commercial_lines",
+      "description": "Professional liability and E&O coverage education.",
+      "risk_level": "medium",
+      "public_retrieval_default": false
+    },
+    {
+      "bucket_key": "workers_comp",
+      "display_name": "Workers Compensation",
+      "bucket_family": "commercial_lines",
+      "description": "Workers compensation rules, classifications, rating, and education.",
+      "risk_level": "medium",
+      "public_retrieval_default": false
+    }
+  ],
+  "source_records": [
+    {
+      "source_id": "src_naic_main",
+      "title": "National Association of Insurance Commissioners",
+      "url": "https://content.naic.org",
+      "canonical_url": "https://content.naic.org",
+      "publisher": "National Association of Insurance Commissioners",
+      "publisher_type": "regulator_association",
+      "source_type": "primary_regulator",
+      "authority_score_seed": 5,
+      "freshness": {
+        "published_date": null,
+        "last_updated_date": null,
+        "captured_at": null,
+        "recheck_after": "2026-12-31",
+        "content_hash": null
+      },
+      "jurisdiction": {
+        "country": "US",
+        "states": [],
+        "jurisdiction_scope": "national"
+      },
+      "buckets": [
+        "national_regulator",
+        "consumer_education"
+      ],
+      "tags": {
+        "intent_tags": [
+          "insurance_education",
+          "coverage_education"
+        ],
+        "insurance_family_tags": [
+          "commercial_lines",
+          "personal_lines",
+          "life_health_benefits"
+        ],
+        "line_of_business_tags": [],
+        "profession_tags": [],
+        "coverage_topic_tags": [
+          "state_regulation",
+          "consumer_rights"
+        ],
+        "safety_tags": [
+          "coverage_disclaimer_required",
+          "agent_handoff_required"
+        ]
+      },
+      "key_details": [
+        {
+          "detail": "Regulator association source for insurance regulation, model laws, market data, and consumer guidance.",
+          "use_case": "Foundational authority source for broad insurance education.",
+          "risk_note": "Use specific pages/chunks after review rather than treating the entire site as one source."
+        }
+      ],
+      "artifact_policy": {
+        "fetch_method": "do_not_fetch_yet",
+        "create_markdown": true,
+        "store_original_artifact": true,
+        "requires_manual_review_before_chunking": true
+      },
+      "review": {
+        "review_status": "unreviewed",
+        "public_answer_allowed": false,
+        "review_priority": "high",
+        "reviewer_notes": "Seed source only. Review specific URLs before promotion."
+      },
+      "retrieval_policy": {
+        "retrieval_status": "disabled",
+        "promotion_status": "not_promoted",
+        "customer_visible_citations_allowed": false,
+        "blocked_intents": [
+          "claims_question",
+          "coverage_determination",
+          "legal_question"
+        ],
+        "allowed_intents": [
+          "insurance_education",
+          "coverage_education"
+        ]
+      },
+      "source_version": 1
+    },
+    {
+      "source_id": "src_naic_glossary",
+      "title": "NAIC Glossary of Insurance Terms",
+      "url": "https://content.naic.org/consumer_glossary",
+      "canonical_url": "https://content.naic.org/consumer_glossary",
+      "publisher": "National Association of Insurance Commissioners",
+      "publisher_type": "regulator_association",
+      "source_type": "regulator_glossary",
+      "authority_score_seed": 5,
+      "freshness": {
+        "published_date": null,
+        "last_updated_date": null,
+        "captured_at": null,
+        "recheck_after": "2026-12-31",
+        "content_hash": null
+      },
+      "jurisdiction": {
+        "country": "US",
+        "states": [],
+        "jurisdiction_scope": "national"
+      },
+      "buckets": [
+        "definitions_and_glossary",
+        "national_regulator"
+      ],
+      "tags": {
+        "intent_tags": [
+          "insurance_education",
+          "coverage_education"
+        ],
+        "insurance_family_tags": [
+          "commercial_lines",
+          "personal_lines",
+          "life_health_benefits"
+        ],
+        "line_of_business_tags": [],
+        "profession_tags": [],
+        "coverage_topic_tags": [
+          "coverage_definition",
+          "policy_terms"
+        ],
+        "safety_tags": [
+          "coverage_disclaimer_required"
+        ]
+      },
+      "key_details": [
+        {
+          "detail": "Regulator-maintained glossary for insurance definitions.",
+          "use_case": "Definition and terminology answers.",
+          "risk_note": "Definitions may not resolve policy-specific or claim-specific questions."
+        }
+      ],
+      "artifact_policy": {
+        "fetch_method": "url_context",
+        "create_markdown": true,
+        "store_original_artifact": true,
+        "requires_manual_review_before_chunking": true
+      },
+      "review": {
+        "review_status": "unreviewed",
+        "public_answer_allowed": false,
+        "review_priority": "high",
+        "reviewer_notes": "Good first candidate for approved public retrieval after review."
+      },
+      "retrieval_policy": {
+        "retrieval_status": "disabled",
+        "promotion_status": "not_promoted",
+        "customer_visible_citations_allowed": false,
+        "blocked_intents": [
+          "claims_question",
+          "coverage_determination",
+          "legal_question"
+        ],
+        "allowed_intents": [
+          "insurance_education",
+          "coverage_education",
+          "underwriting_explanation"
+        ]
+      },
+      "source_version": 1
+    },
+    {
+      "source_id": "src_irmi_main",
+      "title": "International Risk Management Institute",
+      "url": "https://www.irmi.com",
+      "canonical_url": "https://www.irmi.com",
+      "publisher": "IRMI",
+      "publisher_type": "industry_reference",
+      "source_type": "industry_reference",
+      "authority_score_seed": 4,
+      "freshness": {
+        "published_date": null,
+        "last_updated_date": null,
+        "captured_at": null,
+        "recheck_after": "2026-12-31",
+        "content_hash": null
+      },
+      "jurisdiction": {
+        "country": "US",
+        "states": [],
+        "jurisdiction_scope": "general"
+      },
+      "buckets": [
+        "professional_liability",
+        "commercial_lines",
+        "definitions_and_glossary"
+      ],
+      "tags": {
+        "intent_tags": [
+          "insurance_education",
+          "coverage_education",
+          "underwriting_explanation"
+        ],
+        "insurance_family_tags": [
+          "commercial_lines"
+        ],
+        "line_of_business_tags": [
+          "professional_liability",
+          "errors_and_omissions",
+          "general_liability"
+        ],
+        "profession_tags": [
+          "professional_services_firm"
+        ],
+        "coverage_topic_tags": [
+          "claims_made",
+          "retroactive_date",
+          "prior_acts",
+          "defense_costs",
+          "exclusions"
+        ],
+        "safety_tags": [
+          "coverage_disclaimer_required",
+          "policy_form_required",
+          "agent_handoff_required"
+        ]
+      },
+      "key_details": [
+        {
+          "detail": "Recognized commercial insurance and risk management reference.",
+          "use_case": "Commercial coverage explanations and professional liability education.",
+          "risk_note": "Use reviewed specific article URLs, not the whole domain as a blanket citation."
+        }
+      ],
+      "artifact_policy": {
+        "fetch_method": "url_context",
+        "create_markdown": true,
+        "store_original_artifact": true,
+        "requires_manual_review_before_chunking": true
+      },
+      "review": {
+        "review_status": "unreviewed",
+        "public_answer_allowed": false,
+        "review_priority": "high",
+        "reviewer_notes": "Prioritize specific professional liability/E&O pages."
+      },
+      "retrieval_policy": {
+        "retrieval_status": "disabled",
+        "promotion_status": "not_promoted",
+        "customer_visible_citations_allowed": false,
+        "blocked_intents": [
+          "claims_question",
+          "coverage_determination",
+          "legal_question"
+        ],
+        "allowed_intents": [
+          "insurance_education",
+          "coverage_education",
+          "underwriting_explanation"
+        ]
+      },
+      "source_version": 1
+    },
+    {
+      "source_id": "src_ncci_main",
+      "title": "National Council on Compensation Insurance",
+      "url": "https://www.ncci.com",
+      "canonical_url": "https://www.ncci.com",
+      "publisher": "NCCI",
+      "publisher_type": "actuarial",
+      "source_type": "actuarial_research",
+      "authority_score_seed": 5,
+      "freshness": {
+        "published_date": null,
+        "last_updated_date": null,
+        "captured_at": null,
+        "recheck_after": "2026-12-31",
+        "content_hash": null
+      },
+      "jurisdiction": {
+        "country": "US",
+        "states": [],
+        "jurisdiction_scope": "multi_state"
+      },
+      "buckets": [
+        "workers_comp",
+        "actuarial_and_rating"
+      ],
+      "tags": {
+        "intent_tags": [
+          "insurance_education",
+          "coverage_education",
+          "underwriting_explanation"
+        ],
+        "insurance_family_tags": [
+          "commercial_lines"
+        ],
+        "line_of_business_tags": [
+          "workers_compensation"
+        ],
+        "profession_tags": [],
+        "coverage_topic_tags": [
+          "premium_factors",
+          "eligibility",
+          "state_regulation"
+        ],
+        "safety_tags": [
+          "coverage_disclaimer_required",
+          "state_specific_required",
+          "agent_handoff_required"
+        ]
+      },
+      "key_details": [
+        {
+          "detail": "Primary rating/statistical organization for many U.S. workers compensation markets.",
+          "use_case": "Workers comp classifications, rating, and statistical context.",
+          "risk_note": "Workers comp is highly state-specific."
+        }
+      ],
+      "artifact_policy": {
+        "fetch_method": "url_context",
+        "create_markdown": true,
+        "store_original_artifact": true,
+        "requires_manual_review_before_chunking": true
+      },
+      "review": {
+        "review_status": "unreviewed",
+        "public_answer_allowed": false,
+        "review_priority": "normal",
+        "reviewer_notes": "Use after workers comp product strategy exists."
+      },
+      "retrieval_policy": {
+        "retrieval_status": "disabled",
+        "promotion_status": "not_promoted",
+        "customer_visible_citations_allowed": false,
+        "blocked_intents": [
+          "claims_question",
+          "coverage_determination",
+          "legal_question"
+        ],
+        "allowed_intents": [
+          "insurance_education",
+          "coverage_education",
+          "underwriting_explanation"
+        ]
+      },
+      "source_version": 1
+    },
+    {
+      "source_id": "src_california_doi",
+      "title": "California Department of Insurance",
+      "url": "https://www.insurance.ca.gov",
+      "canonical_url": "https://www.insurance.ca.gov",
+      "publisher": "California Department of Insurance",
+      "publisher_type": "state_regulator",
+      "source_type": "state_regulator",
+      "authority_score_seed": 5,
+      "freshness": {
+        "published_date": null,
+        "last_updated_date": null,
+        "captured_at": null,
+        "recheck_after": "2026-09-30",
+        "content_hash": null
+      },
+      "jurisdiction": {
+        "country": "US",
+        "states": [
+          "CA"
+        ],
+        "jurisdiction_scope": "state"
+      },
+      "buckets": [
+        "state_regulator",
+        "consumer_education"
+      ],
+      "tags": {
+        "intent_tags": [
+          "insurance_education",
+          "coverage_education",
+          "product_availability_question"
+        ],
+        "insurance_family_tags": [
+          "commercial_lines",
+          "personal_lines"
+        ],
+        "line_of_business_tags": [],
+        "profession_tags": [],
+        "coverage_topic_tags": [
+          "state_regulation",
+          "consumer_rights"
+        ],
+        "safety_tags": [
+          "coverage_disclaimer_required",
+          "state_specific_required",
+          "agent_handoff_required"
+        ]
+      },
+      "key_details": [
+        {
+          "detail": "Official insurance regulator for California.",
+          "use_case": "California-specific consumer and regulatory context.",
+          "risk_note": "Use specific pages, not domain-level generalizations."
+        }
+      ],
+      "artifact_policy": {
+        "fetch_method": "url_context",
+        "create_markdown": true,
+        "store_original_artifact": true,
+        "requires_manual_review_before_chunking": true
+      },
+      "review": {
+        "review_status": "unreviewed",
+        "public_answer_allowed": false,
+        "review_priority": "high",
+        "reviewer_notes": "Prioritize if CA is one of the launch states."
+      },
+      "retrieval_policy": {
+        "retrieval_status": "disabled",
+        "promotion_status": "not_promoted",
+        "customer_visible_citations_allowed": false,
+        "blocked_intents": [
+          "claims_question",
+          "coverage_determination",
+          "legal_question"
+        ],
+        "allowed_intents": [
+          "insurance_education",
+          "coverage_education"
+        ]
+      },
+      "source_version": 1
+    }
+  ],
+  "source_relationships": [
+    {
+      "from_source_id": "src_naic_glossary",
+      "to_source_id": "src_naic_main",
+      "relationship_type": "defines",
+      "notes": "NAIC glossary supports definitions inside the broader NAIC authority bucket."
+    },
+    {
+      "from_source_id": "src_california_doi",
+      "to_source_id": "src_naic_main",
+      "relationship_type": "state_specific_version_of",
+      "notes": "State regulator source should outrank national general sources for California-specific regulatory questions."
+    }
+  ],
+  "product_flow_links": [
+    {
+      "product_key": "professional_liability.real_estate_agent_eo",
+      "source_ids": [
+        "src_naic_glossary",
+        "src_irmi_main",
+        "src_california_doi"
+      ],
+      "use_case": "coverage_education",
+      "notes": "Seed sources only. Specific professional liability and real estate E&O URLs should be added before public retrieval."
+    }
+  ],
+  "import_policy": {
+    "reject_if_public_retrieval_enabled": true,
+    "reject_if_review_status_approved_from_external_bundle": true,
+    "dedupe_strategy": "canonical_url",
+    "allow_update_existing_sources": true
+  }
+}

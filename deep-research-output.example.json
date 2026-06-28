@@ -1,0 +1,32 @@
+{
+  "schema_version": "policygpt.deep_research_output.v3.0",
+  "research_metadata": {
+    "research_id": "research_re_eo_ca",
+    "created_at": "2026-06-28T00:00:00Z",
+    "topic": "Real estate agent E&O coverage education sources (CA)",
+    "target_products": ["professional_liability.real_estate_agent_eo"],
+    "target_states": ["CA"],
+    "target_intents": ["coverage_education"]
+  },
+  "recommended_bucket_definitions": [
+    { "bucket_key": "state_regulator", "display_name": "State Regulators", "bucket_family": "regulator", "risk_level": "low" }
+  ],
+  "source_candidates": [
+    {
+      "source_id": "src_ca_doi",
+      "title": "California Department of Insurance",
+      "url": "https://www.insurance.ca.gov",
+      "publisher": "California DOI",
+      "publisher_type": "state_regulator",
+      "source_type": "state_regulator",
+      "authority_score_seed": 5,
+      "jurisdiction": { "country": "US", "states": ["CA"], "jurisdiction_scope": "state" },
+      "suggested_buckets": ["state_regulator", "consumer_education"],
+      "suggested_tags": { "intent_tags": ["coverage_education"], "line_of_business_tags": ["professional_liability"] },
+      "key_facts": ["State regulator for insurance in California."],
+      "safe_for_public_after_review": true,
+      "freshness_notes": "Authoritative; recheck annually.",
+      "review_priority": "high"
+    }
+  ]
+}
