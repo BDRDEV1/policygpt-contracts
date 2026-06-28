@@ -168,4 +168,31 @@ const badStatusDoc = JSON.parse(JSON.stringify(researchImportBundle));
 badStatusDoc.documents[0].review_status = "approved";
 assert.equal(validateResearchImport(badStatusDoc), false, "research-import review_status must be one of the allowed enum values");
 
+// --- Routed insurance platform v3 contracts ---
+const v3Pairs = [
+  ["rag-import-bundle.schema.json", "rag-import-bundle.example.json", "policygpt.rag_import_bundle.v3.0"],
+  ["deep-research-output.schema.json", "deep-research-output.example.json", "policygpt.deep_research_output.v3.0"],
+  ["intent-router-result.schema.json", "intent-router-result.example.json", "policygpt.intent_router_result.v1"],
+  ["product-flow-registry.schema.json", "product-flow-registry.example.json", "policygpt.product_flow_registry.v1"],
+  ["rag-evidence-answer.schema.json", "rag-evidence-answer.example.json", "policygpt.rag_evidence_answer.v2"]
+];
+for (const [schemaFile, exampleFile, version] of v3Pairs) {
+  const validate = ajv.compile(readJson(schemaFile));
+  const example = readJson(exampleFile);
+  assert.equal(validate(example), true, `${exampleFile} valid: ${JSON.stringify(validate.errors)}`);
+  assert.equal(example.schema_version, version, `${schemaFile} schema_version frozen to ${version}`);
+}
+
+// rag-evidence-answer: a blocked answer must report Blocked evidence strength.
+const validateAnswer = ajv.getSchema("https://policygpt.com/contracts/rag-evidence-answer.schema.json");
+const blockedAnswer = { ...readJson("rag-evidence-answer.example.json"), blocked: true, evidence_strength: "High" };
+assert.equal(validateAnswer(blockedAnswer), false, "blocked answers must have evidence_strength Blocked");
+
+// deep-research-output must NOT carry any retrieval/approval enabling fields (it only proposes).
+const drSchema = readJson("deep-research-output.schema.json");
+const candidateProps = Object.keys(drSchema.properties.source_candidates.items.properties);
+for (const banned of ["retrieval_status", "review_status", "promotion_status", "public_answer_allowed"]) {
+  assert.equal(candidateProps.includes(banned), false, `deep-research candidate must not include ${banned} (cannot self-approve)`);
+}
+
 console.log("PolicyGPT contract smoke tests passed.");

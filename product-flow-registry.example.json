@@ -1,0 +1,23 @@
+{
+  "schema_version": "policygpt.product_flow_registry.v1",
+  "updated_at": "2026-06-28T00:00:00Z",
+  "products": [
+    {
+      "product_key": "professional_liability.real_estate_agent_eo",
+      "display_name": "Real Estate Agent E&O Insurance",
+      "aliases": ["real estate E&O", "realtor E&O", "errors and omissions for realtors"],
+      "family": "commercial_lines",
+      "line_of_business": "professional_liability",
+      "profession_targets": ["real_estate_agent", "realtor", "real_estate_broker"],
+      "agency_offers": true,
+      "quote_flow_status": "live_quote_flow",
+      "supported_states": ["CA"],
+      "seo_page_urls": ["https://policygpt.com/real-estate-professional-liability"],
+      "question_set_id": "real_estate_agent_eo_v1",
+      "source_buckets": ["professional_liability", "errors_and_omissions", "real_estate_agent_eo", "claims_made"],
+      "default_action": "launch_quote_flow",
+      "licensed_agent_required": "before_bind",
+      "disclaimer_level": "coverage_education"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/contracts/deep-research-output.schema.json",
+  "title": "PolicyGPT Deep Research Output v3",
+  "description": "Output of a Deep Research run: proposed verified-source candidates + metadata for Command Center import. Deep Research PROPOSES only; it can never approve, promote, review, or enable public retrieval. Every candidate must import as unreviewed/disabled.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "research_metadata", "source_candidates"],
+  "properties": {
+    "schema_version": { "const": "policygpt.deep_research_output.v3.0" },
+    "research_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["research_id", "topic"],
+      "properties": {
+        "research_id": { "type": "string", "minLength": 1 },
+        "created_at": { "type": ["string", "null"], "format": "date-time" },
+        "topic": { "type": "string", "minLength": 1 },
+        "target_products": { "type": "array", "items": { "type": "string" } },
+        "target_states": { "type": "array", "items": { "type": "string" } },
+        "target_intents": { "type": "array", "items": { "type": "string" } },
+        "researcher_notes": { "type": "string" }
+      }
+    },
+    "recommended_bucket_definitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["bucket_key", "display_name"],
+        "properties": {
+          "bucket_key": { "type": "string" },
+          "display_name": { "type": "string" },
+          "bucket_family": { "type": "string" },
+          "description": { "type": "string" },
+          "risk_level": { "type": "string", "enum": ["low", "medium", "high", "restricted"] }
+        }
+      }
+    },
+    "source_candidates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "title", "url", "publisher", "source_type", "suggested_buckets"],
+        "properties": {
+          "source_id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "url": { "type": "string", "format": "uri" },
+          "canonical_url": { "type": ["string", "null"], "format": "uri" },
+          "publisher": { "type": "string", "minLength": 1 },
+          "publisher_type": {
+            "type": "string",
+            "enum": ["state_regulator", "federal_agency", "regulator_association", "industry_reference", "academic", "actuarial", "consumer_education", "carrier", "trade_association", "agency_internal", "case_law", "other"]
+          },
+          "source_type": {
+            "type": "string",
+            "enum": ["primary_regulator", "state_regulator", "federal_agency", "regulator_glossary", "industry_reference", "academic_research", "actuarial_research", "consumer_education", "carrier_document", "trade_association", "agency_internal", "case_law", "claim_case_study", "low_authority_background"]
+          },
+          "authority_score_seed": { "type": "integer", "minimum": 0, "maximum": 5 },
+          "jurisdiction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "country": { "type": "string" },
+              "states": { "type": "array", "items": { "type": "string" } },
+              "jurisdiction_scope": { "type": "string", "enum": ["national", "state", "multi_state", "carrier_specific", "general", "unknown"] }
+            }
+          },
+          "suggested_buckets": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "suggested_tags": {
+            "type": "object",
+            "properties": {
+              "intent_tags": { "type": "array", "items": { "type": "string" } },
+              "insurance_family_tags": { "type": "array", "items": { "type": "string" } },
+              "line_of_business_tags": { "type": "array", "items": { "type": "string" } },
+              "profession_tags": { "type": "array", "items": { "type": "string" } },
+              "coverage_topic_tags": { "type": "array", "items": { "type": "string" } },
+              "source_type_tags": { "type": "array", "items": { "type": "string" } },
+              "safety_tags": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "key_facts": { "type": "array", "items": { "type": "string" } },
+          "suggested_evidence_use": { "type": "string" },
+          "risk_flags": { "type": "array", "items": { "type": "string" } },
+          "safe_for_public_after_review": { "type": "boolean" },
+          "freshness_notes": { "type": "string" },
+          "review_priority": { "type": "string", "enum": ["low", "medium", "high"] }
+        }
+      }
+    }
+  }
+}

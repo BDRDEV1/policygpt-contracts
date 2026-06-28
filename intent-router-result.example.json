@@ -1,0 +1,23 @@
+{
+  "schema_version": "policygpt.intent_router_result.v1",
+  "route_class": "coverage_education_question",
+  "conversation_lane": "lane_a_education",
+  "confidence": 0.86,
+  "is_blocked": false,
+  "block_reason": null,
+  "deterministic_trigger": null,
+  "requires_registry_check": false,
+  "product_key": "professional_liability.real_estate_agent_eo",
+  "line_of_business": "professional_liability",
+  "profession": "real_estate_agent",
+  "state": "CA",
+  "needed_buckets": ["professional_liability", "real_estate_agent_eo", "state_regulator"],
+  "needed_tags": {
+    "line_of_business_tags": ["professional_liability"],
+    "coverage_topic_tags": ["claims_made", "exclusions"],
+    "profession_tags": ["real_estate_agent"],
+    "state_tags": ["CA"]
+  },
+  "disclaimer_level": "coverage_education",
+  "model_route": "gemini-2.5-flash"
+}

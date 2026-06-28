@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygpt.com/contracts/product-flow-registry.schema.json",
+  "title": "PolicyGPT Product / Flow Registry v1",
+  "description": "The source of truth for what PolicyGPT may sell or launch. Lives in the Coordinator (system of record), admin-edited, read by the router/plugin. A quote flow may only launch when the registry marks the product live_quote_flow AND the user's state is in supported_states. User intent is never permission to sell.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "products"],
+  "properties": {
+    "schema_version": { "const": "policygpt.product_flow_registry.v1" },
+    "updated_at": { "type": ["string", "null"], "format": "date-time" },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["product_key", "display_name", "line_of_business", "quote_flow_status", "default_action"],
+        "properties": {
+          "product_key": { "type": "string", "pattern": "^[a-z0-9_]+\\.[a-z0-9_]+$" },
+          "display_name": { "type": "string" },
+          "aliases": { "type": "array", "items": { "type": "string" } },
+          "family": { "type": "string" },
+          "line_of_business": { "type": "string" },
+          "profession_targets": { "type": "array", "items": { "type": "string" } },
+          "agency_offers": { "type": "boolean" },
+          "quote_flow_status": {
+            "type": "string",
+            "enum": ["live_quote_flow", "draft_quote_flow", "lead_only", "education_only", "agent_handoff_only", "not_offered", "disabled"]
+          },
+          "supported_states": {
+            "type": "array",
+            "description": "States where this quote flow is licensed/live. Empty = no quote flow may launch. This is a licensing control — enforced server-side.",
+            "items": { "type": "string", "pattern": "^[A-Z]{2}$" }
+          },
+          "seo_page_urls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+          "question_set_id": { "type": ["string", "null"] },
+          "source_buckets": { "type": "array", "items": { "type": "string" } },
+          "default_action": {
+            "type": "string",
+            "enum": ["launch_quote_flow", "lead_capture", "education_only", "agent_handoff", "decline"]
+          },
+          "licensed_agent_required": {
+            "type": "string",
+            "enum": ["before_bind", "before_quote", "always", "not_required"]
+          },
+          "disclaimer_level": {
+            "type": "string",
+            "enum": ["general_insurance_education", "coverage_education", "claims_block", "none"]
+          }
+        }
+      }
+    }
+  }
+}

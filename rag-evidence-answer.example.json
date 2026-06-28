@@ -1,0 +1,28 @@
+{
+  "schema_version": "policygpt.rag_evidence_answer.v2",
+  "lane": "lane_a_education",
+  "answer": "Errors & omissions (E&O) insurance for real estate agents covers claims alleging negligence, errors, or omissions in the professional services you provide. It is typically written on a claims-made basis, so the claim must be made and reported during the policy period (subject to any retroactive date).",
+  "blocked": false,
+  "block_reason": null,
+  "evidence_strength": "High",
+  "buckets_used": ["professional_liability", "real_estate_agent_eo", "state_regulator"],
+  "citations": [
+    {
+      "source_id": "src_ca_doi",
+      "title": "California Department of Insurance",
+      "url": "https://www.insurance.ca.gov",
+      "publisher": "California DOI",
+      "source_type": "state_regulator",
+      "authority_score": 5,
+      "captured_at": "2026-06-28T00:00:00Z",
+      "jurisdiction_states": ["CA"]
+    }
+  ],
+  "retrieval_mode": "reviewed_source_graph",
+  "web_search_used": false,
+  "disclaimer_level": "coverage_education",
+  "disclaimer": "This is a general coverage explanation only. Actual coverage depends on the policy wording, exclusions, endorsements, application answers, state law, carrier underwriting, and the facts of the situation. PolicyGPT is an AI assistant and can make mistakes. A licensed agent or attorney should review your specific situation before you rely on this information.",
+  "byline": "Reviewed by PolicyGPT.com Insurance AI Assistant",
+  "model_route": "claude-sonnet-4-6",
+  "evidence_packet_id": "evp_re_eo_ca_001"
+}
