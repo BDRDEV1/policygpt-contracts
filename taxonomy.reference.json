@@ -2,58 +2,175 @@
   "schema_version": "policygpt.source_taxonomy.v1",
   "description": "Canonical bucket families + tag vocabularies for the reviewed insurance source graph. Reference data shared by the v3 importer, the intent router (needed_buckets/tags), the Command Center console, and the Deep Research prompt. Imports accept arbitrary bucket/tag strings, but new values should be added here so the system stays consistent.",
   "bucket_families": [
-    "definitions_and_glossary", "national_regulator", "state_regulator", "consumer_education",
-    "commercial_lines", "professional_liability", "errors_and_omissions", "claims_made",
-    "real_estate_agent_eo", "workers_comp", "flood", "health_insurance", "life_insurance",
-    "personal_lines", "auto_insurance", "property_insurance", "risk_management",
-    "actuarial_and_rating", "carrier_guidelines", "underwriting_questions", "quote_flow_questions",
-    "agency_rules", "disclaimers_and_compliance", "claims_case_studies", "legal_precedent"
+    "definitions_and_glossary",
+    "national_regulator",
+    "state_regulator",
+    "consumer_education",
+    "commercial_lines",
+    "professional_liability",
+    "errors_and_omissions",
+    "claims_made",
+    "real_estate_agent_eo",
+    "workers_comp",
+    "flood",
+    "health_insurance",
+    "life_insurance",
+    "personal_lines",
+    "auto_insurance",
+    "property_insurance",
+    "risk_management",
+    "actuarial_and_rating",
+    "carrier_guidelines",
+    "underwriting_questions",
+    "quote_flow_questions",
+    "agency_rules",
+    "disclaimers_and_compliance",
+    "claims_case_studies",
+    "legal_precedent"
   ],
   "restricted_buckets_public_answer_disabled_at_launch": [
     "claims_case_studies",
     "legal_precedent"
   ],
+  "bucket_freshness_defaults": {
+    "definitions_and_glossary": {
+      "freshness_mode": "evergreen"
+    },
+    "disclaimers_and_compliance": {
+      "freshness_mode": "evergreen"
+    },
+    "national_regulator": {
+      "freshness_mode": "time_decay",
+      "freshness_horizon_months": 12
+    },
+    "state_regulator": {
+      "freshness_mode": "time_decay",
+      "freshness_horizon_months": 12
+    },
+    "carrier_guidelines": {
+      "freshness_mode": "time_decay",
+      "freshness_horizon_months": 12
+    },
+    "agency_rules": {
+      "freshness_mode": "time_decay",
+      "freshness_horizon_months": 12
+    }
+  },
+  "_bucket_freshness_defaults_note": "Per-family freshness seed defaults the coordinator applies when seeding buckets from this taxonomy. Families not listed default to time_decay / 24 months. evergreen = age irrelevant (excluded from scoring, never expires).",
   "tags": {
     "intent_tags": [
-      "insurance_education", "coverage_education", "quote_intent", "quote_intake_support",
-      "underwriting_explanation", "quote_result_explanation", "claims_question",
-      "coverage_determination", "legal_sensitive", "agent_handoff"
+      "insurance_education",
+      "coverage_education",
+      "quote_intent",
+      "quote_intake_support",
+      "underwriting_explanation",
+      "quote_result_explanation",
+      "claims_question",
+      "coverage_determination",
+      "legal_sensitive",
+      "agent_handoff"
     ],
     "insurance_family_tags": [
-      "commercial_lines", "personal_lines", "life_health_benefits", "specialty_lines",
-      "professional_services", "real_estate"
+      "commercial_lines",
+      "personal_lines",
+      "life_health_benefits",
+      "specialty_lines",
+      "professional_services",
+      "real_estate"
     ],
     "line_of_business_tags": [
-      "professional_liability", "errors_and_omissions", "general_liability",
-      "business_owners_policy", "commercial_property", "workers_compensation",
-      "commercial_auto", "cyber_liability", "employment_practices_liability",
-      "directors_and_officers", "crime_fidelity", "inland_marine", "umbrella_excess",
-      "personal_auto", "homeowners", "renters", "condo", "flood", "life_insurance",
-      "health_insurance", "medicare", "disability", "group_benefits"
+      "professional_liability",
+      "errors_and_omissions",
+      "general_liability",
+      "business_owners_policy",
+      "commercial_property",
+      "workers_compensation",
+      "commercial_auto",
+      "cyber_liability",
+      "employment_practices_liability",
+      "directors_and_officers",
+      "crime_fidelity",
+      "inland_marine",
+      "umbrella_excess",
+      "personal_auto",
+      "homeowners",
+      "renters",
+      "condo",
+      "flood",
+      "life_insurance",
+      "health_insurance",
+      "medicare",
+      "disability",
+      "group_benefits"
     ],
     "profession_tags": [
-      "real_estate_agent", "real_estate_broker", "property_manager", "insurance_agent",
-      "consultant", "bookkeeper", "accountant", "mortgage_broker", "home_inspector",
-      "technology_consultant", "marketing_consultant", "professional_services_firm"
+      "real_estate_agent",
+      "real_estate_broker",
+      "property_manager",
+      "insurance_agent",
+      "consultant",
+      "bookkeeper",
+      "accountant",
+      "mortgage_broker",
+      "home_inspector",
+      "technology_consultant",
+      "marketing_consultant",
+      "professional_services_firm"
     ],
     "coverage_topic_tags": [
-      "coverage_definition", "policy_terms", "claims_made", "occurrence", "retroactive_date",
-      "prior_acts", "deductible", "limits", "aggregate_limit", "per_claim_limit", "exclusions",
-      "defense_costs", "consent_to_settle", "professional_services", "property_management",
-      "independent_contractors", "revenue_rating", "prior_insurance", "prior_claims",
-      "risk_controls", "carrier_appetite", "eligibility", "state_regulation",
-      "consumer_rights", "premium_factors"
+      "coverage_definition",
+      "policy_terms",
+      "claims_made",
+      "occurrence",
+      "retroactive_date",
+      "prior_acts",
+      "deductible",
+      "limits",
+      "aggregate_limit",
+      "per_claim_limit",
+      "exclusions",
+      "defense_costs",
+      "consent_to_settle",
+      "professional_services",
+      "property_management",
+      "independent_contractors",
+      "revenue_rating",
+      "prior_insurance",
+      "prior_claims",
+      "risk_controls",
+      "carrier_appetite",
+      "eligibility",
+      "state_regulation",
+      "consumer_rights",
+      "premium_factors"
     ],
     "source_type_tags": [
-      "primary_regulator", "state_regulator", "federal_agency", "regulator_glossary",
-      "industry_reference", "academic_research", "actuarial_research", "consumer_education",
-      "carrier_document", "agency_internal", "trade_association", "case_law",
-      "claim_case_study", "seo_background", "low_authority_background"
+      "primary_regulator",
+      "state_regulator",
+      "federal_agency",
+      "regulator_glossary",
+      "industry_reference",
+      "academic_research",
+      "actuarial_research",
+      "consumer_education",
+      "carrier_document",
+      "agency_internal",
+      "trade_association",
+      "case_law",
+      "claim_case_study",
+      "seo_background",
+      "low_authority_background"
     ],
     "safety_tags": [
-      "public_answer_allowed", "public_answer_disallowed", "claims_block_required",
-      "legal_disclaimer_required", "coverage_disclaimer_required", "agent_handoff_required",
-      "attorney_handoff_required", "policy_form_required", "state_specific_required",
+      "public_answer_allowed",
+      "public_answer_disallowed",
+      "claims_block_required",
+      "legal_disclaimer_required",
+      "coverage_disclaimer_required",
+      "agent_handoff_required",
+      "attorney_handoff_required",
+      "policy_form_required",
+      "state_specific_required",
       "carrier_specific_required"
     ]
   }
