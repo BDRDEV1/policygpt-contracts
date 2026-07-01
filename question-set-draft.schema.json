@@ -36,8 +36,8 @@
           "id": { "type": "string" },
           "prompt": { "type": "string", "description": "the question text as shown on the carrier site" },
           "answer_type": {
-            "enum": ["yes_no", "single_select", "multi_select", "currency", "number", "date", "phone", "email", "address", "text"],
-            "description": "Reuses the existing card/answer-type contract (architecture plan section 3.2)."
+            "enum": ["yes_no", "single_select", "multi_select", "currency", "number", "percent", "date", "year", "duration", "phone", "email", "address", "state", "contact", "claim", "url", "id_reference", "file", "range", "percent_split", "money_frequency", "coverage_limit", "conditional", "attestation", "text"],
+            "description": "Canonical answer-type vocabulary shared by the rater crawler (ANSWER_TYPES in src/automation/question-crawler.js), the coordinator's PENDING_CARRIER_ANSWER_TYPES, and the plugin card TYPE_MAP. Keeps all legacy values and extends them with the full rater set. Single source of truth (architecture plan section 3.2)."
           },
           "required": { "type": "boolean" },
           "options": {

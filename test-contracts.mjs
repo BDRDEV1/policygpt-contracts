@@ -152,6 +152,46 @@ assert.equal(
   "evidence-packet candidate vector_dim must not exceed 2048 (Firestore limit)"
 );
 
+// --- Drift guard: question-set-draft answer_type vocabulary is self-consistent ---
+// The canonical enum is the SINGLE SOURCE OF TRUTH vendored (unchanged) into the
+// coordinator and derived by the plugin. It must (a) retain every legacy value so
+// existing drafts keep validating and (b) carry the full extended rater vocabulary
+// so widened crawler output (percent/state/coverage_limit/attestation/...) no longer
+// 400s. If this drifts, sync-contracts would silently revert the coordinator's copy.
+const questionSetDraftSchema = readJson("question-set-draft.schema.json");
+const validateQuestionSetDraft = ajv.compile(questionSetDraftSchema);
+const answerTypeEnum = questionSetDraftSchema.properties.questions.items.properties.answer_type.enum;
+
+const LEGACY_ANSWER_TYPES = ["yes_no", "single_select", "multi_select", "currency", "number", "date", "phone", "email", "address", "text"];
+for (const legacy of LEGACY_ANSWER_TYPES) {
+  assert.ok(answerTypeEnum.includes(legacy), `answer_type enum must retain legacy value ${legacy}`);
+}
+const EXTENDED_ANSWER_TYPES = ["percent", "year", "duration", "state", "contact", "claim", "url", "id_reference", "file", "range", "percent_split", "money_frequency", "coverage_limit", "conditional", "attestation"];
+for (const extended of EXTENDED_ANSWER_TYPES) {
+  assert.ok(answerTypeEnum.includes(extended), `answer_type enum must carry extended rater value ${extended}`);
+}
+assert.equal(new Set(answerTypeEnum).size, answerTypeEnum.length, "answer_type enum must not contain duplicates");
+assert.equal(answerTypeEnum.length, LEGACY_ANSWER_TYPES.length + EXTENDED_ANSWER_TYPES.length, "answer_type enum is exactly the legacy + extended rater vocabulary (no drift)");
+
+const draftWithExtendedType = {
+  schema_version: "1.0",
+  event_type: "policygpt.comparative_rater.question_set.drafted",
+  line_of_business: "professional_liability",
+  profession: "real_estate_agent",
+  source_carrier: "amwins_carrier_a",
+  questions: [
+    { id: "q1", prompt: "Prior E&O coverage limit?", answer_type: "coverage_limit" },
+    { id: "q2", prompt: "Licensed state?", answer_type: "state" },
+    { id: "q3", prompt: "Attest to accuracy", answer_type: "attestation" }
+  ]
+};
+assert.equal(validateQuestionSetDraft(draftWithExtendedType), true, JSON.stringify(validateQuestionSetDraft.errors, null, 2));
+assert.equal(
+  validateQuestionSetDraft({ ...draftWithExtendedType, questions: [{ id: "q1", prompt: "?", answer_type: "not_a_real_type" }] }),
+  false,
+  "answer_type enum must reject unknown values"
+);
+
 // --- Command Center research-import bundle (policygpt.research_import_bundle.v2) ---
 const researchImportSchema = readJson("research-import-bundle.schema.json");
 const validateResearchImport = ajv.compile(researchImportSchema);
